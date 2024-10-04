@@ -15,7 +15,7 @@ import ScheduleInterviewForm from "./pages/ScheduleInterview";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <div>Hello world</div>,
+    element: <Signin />,
   },
   {
     path: "/register",
@@ -36,12 +36,6 @@ function App() {
     
     <div>
       <RouterProvider router={router} />
-      <Router>
-      <Routes>
-        <Route path="/" element={<ScheduleInterview />} />
-        <Route path="/schedule-interview" element={<ScheduleInterviewForm />} />
-      </Routes>
-    </Router>
     </div>
   );
 }
