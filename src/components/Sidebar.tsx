@@ -13,17 +13,18 @@ const Sidebar: React.FC = () => {
         width: 240,
         height: '100vh',
         backgroundColor: '#f8f9fa',
-        padding: '10px',  // Reduced padding to make the logo closer to the list
+        padding: '10px',
         boxSizing: 'border-box',
       }}
     >
       {/* Adjust logo size and position */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>  {/* Decreased bottom margin */}
-        <img src="/logo.png" alt="Interview Manager Logo" style={{ width: '150px', height: 'auto' }} /> {/* Larger logo */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+        <img src="/logo.png" alt="Interview Manager Logo" style={{ width: '150px', height: 'auto' }} />
       </Box>
 
       <List>
-        <ListItem component={Link} to="/schedule-interview">
+        {/* "Schedule Interview" linking back to the same page with optional reload */}
+        <ListItem component={Link} to="/schedule-interview" onClick={() => window.location.reload()}>
           <ListItemIcon>
             <AddIcon />
           </ListItemIcon>
