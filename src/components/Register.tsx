@@ -50,12 +50,13 @@ function Register() {
 
   const onSubmit = (data: FormData) => {
     console.log("Form submitted:", data);
+    alert("Registration Successful")
   };
 
   const handleBlur = (field: keyof FormData) => {
     if (field === "email") {
       const email = watch("email");
-      if (!validateEmail(email)) {
+      if (!!email && !validateEmail(email)) {
         setError("email", { message: "Email is not valid." });
       } else {
         clearErrors("email");
@@ -65,26 +66,17 @@ function Register() {
     if (field === "confirmEmail") {
       const email = watch("email");
       const confirmEmail = watch("confirmEmail");
-      if (confirmEmail !== email) {
+      if (!!confirmEmail && confirmEmail !== email) {
         setError("confirmEmail", { message: "Emails do not match." });
       } else {
         clearErrors("confirmEmail");
       }
     }
 
-    if (field === "password") {
-      const password = watch("password");
-      if (!password) {
-        setError("password", { message: "Password is required." });
-      } else {
-        clearErrors("password");
-      }
-    }
-
     if (field === "confirmPassword") {
       const password = watch("password");
       const confirmPassword = watch("confirmPassword");
-      if (confirmPassword !== password) {
+      if (!!confirmPassword && confirmPassword !== password) {
         setError("confirmPassword", { message: "Passwords do not match." });
       } else {
         clearErrors("confirmPassword");
