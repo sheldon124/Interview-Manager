@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import {
   FormControl,
   TextField,
@@ -8,6 +10,9 @@ import {
   MenuItem,
   Select,
   FormHelperText,
+  Snackbar,
+  SnackbarCloseReason,
+  Alert,
 } from "@mui/material";
 
 interface FormData {
@@ -46,11 +51,16 @@ function Register() {
     formState: { errors },
   } = useForm<FormData>();
 
+  const [open, setOpen] = useState(false);
+
+  const navigate = useNavigate();
+
   const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     console.log("Form submitted:", data);
-    alert("Registration Successful")
+    localStorage.setItem("showsnackbar", "true");
+    navigate("/signin");
   };
 
   const handleBlur = (field: keyof FormData) => {
@@ -84,10 +94,21 @@ function Register() {
     }
   };
 
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
+  };
+
   return (
     <div className="flex flex-row">
       <div className="bg-blue-700 w-1/3 h-screen" />
-      <div className="w-full m-auto">
+      <div className="m-auto">
         <div className="mx-auto w-[500px] mt-5">
           <h1 className="font-bold text-3xl">Create Your Account</h1>
           <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
@@ -257,6 +278,20 @@ function Register() {
               <Button variant="contained" type="submit">
                 Create
               </Button>
+              <Snackbar
+                open={open}
+                autoHideDuration={6000}
+                onClose={handleClose}
+              >
+                <Alert
+                  onClose={handleClose}
+                  severity="success"
+                  variant="filled"
+                  sx={{ width: "100%" }}
+                >
+                  This is a success Alert inside a Snackbar!
+                </Alert>
+              </Snackbar>
             </Box>
           </form>
         </div>
