@@ -1,6 +1,18 @@
 import { useForm, SubmitHandler } from "react-hook-form";
-import { FormControl, TextField, Button, Link } from "@mui/material";
+import { useState } from "react";
+import {
+  FormControl,
+  TextField,
+  Button,
+  Link,
+  Snackbar,
+  SnackbarCloseReason,
+  Alert,
+  Backdrop,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 interface FormInputs {
   email: string;
@@ -16,12 +28,56 @@ const SigninForm: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const onSubmit: SubmitHandler<FormInputs> = (data) => {
-    navigate("/scheduleinterview");
+  const [open, setOpen] = useState(false);
+  const [overlay, setOverlay] = useState(false);
+
+  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+    try {
+      setOverlay(true);
+      // Make a POST request to your API endpoint
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/login/",
+        data
+      );
+      // If successful, navigate to the /interview-list page
+      if (response.status === 200) {
+        navigate("/interview-list");
+      }
+    } catch (error) {
+      // Handle error (you might want to display an error message)
+      setOverlay(false);
+      setOpen(true);
+    }
+  };
+
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
   };
 
   return (
     <div className="m-auto">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        <Alert
+          onClose={handleClose}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          Invalid Username or Password!
+        </Alert>
+      </Snackbar>
       <FormControl>
         <h1 className="font-bold text-3xl">Sign In</h1>
         <form
@@ -72,6 +128,13 @@ const SigninForm: React.FC = () => {
           </div>
         </form>
       </FormControl>
+      <Backdrop
+        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+        open={overlay}
+        // onClick={handleClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </div>
   );
 };

@@ -1,11 +1,14 @@
 import Calendar from "../components/Calendar";
 import { useEffect, useState, useContext } from "react";
-import { Container, Button, Stack, Box, Divider } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Container, Button, Box, Divider } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import moment from "moment";
 import CustomTable from "../components/CustomTable";
 import { getInterviewsByDate } from "../dummy-data/mockInterviews";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
+import Navbar from "../components/NavBar";
 
 type AlignType =
   | "right"
@@ -77,6 +80,7 @@ interface Interview {
 }
 
 const InterviewList = () => {
+  const navigate = useNavigate();
   const [date, setDate] = useState(moment());
   const [mockInterviews, setMockInterviews] = useState<Interview[]>([]);
   const [unassignedFilter, setUnassignedFilter] = useState(false); // Track unassigned state
@@ -105,46 +109,64 @@ const InterviewList = () => {
   };
 
   return (
-    <Container sx={{ mt: 10 }}>
-      <Stack spacing={3} mt={1} mb={3}>
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+    <>
+      <Navbar />
+      <Container maxWidth="xl" sx={{ display: "flex", marginLeft: "40px" }}>
+        <Box>
+          <CustomTable
+            title="Scheduled Interviews"
+            primaryButton={
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ gap: "4px", padding: "8px 24px 8px 20px" }}
+                onClick={() => navigate("/scheduleinterview")}
+              >
+                <AddIcon sx={{ fontSize: "1.25rem" }} />
+                Schedule
+              </Button>
+            }
+            TABLE_HEAD={TABLE_HEAD_IL}
+            columnOrder={[
+              "id",
+              "interviewee",
+              "date",
+              "time",
+              "duration",
+              "role",
+              "interviewer",
+              "additional_notes",
+            ]}
+            data={mockInterviews}
+          />
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={unassignedFilter}
+                  onChange={handleToggleUnassigned}
+                />
+              }
+              label="Unassigned"
+            />
+          </Box>
+        </Box>
+        <Divider sx={{ marginTop: "60px" }} orientation="vertical" flexItem />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "80px",
+            marginLeft: "50px",
+          }}
+        >
           <Calendar
             date={date}
             handleDateChange={(newValue) => setDate(newValue)}
           />
         </Box>
-
-        <Divider />
-
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={unassignedFilter}
-                onChange={handleToggleUnassigned}
-              />
-            }
-            label="Unassigned"
-          />
-        </Box>
-
-        <CustomTable
-          title="Scheduled Interviews"
-          TABLE_HEAD={TABLE_HEAD_IL}
-          columnOrder={[
-            "id",
-            "interviewee",
-            "date",
-            "time",
-            "duration",
-            "role",
-            "interviewer",
-            "additional_notes",
-          ]}
-          data={mockInterviews}
-        />
-      </Stack>
-    </Container>
+      </Container>
+    </>
   );
 };
 
