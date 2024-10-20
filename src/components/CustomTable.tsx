@@ -82,7 +82,7 @@ export default function CustomTable({
   );
 
   return (
-    <Box sx={{ p: 0, mt: mtCustom }}>
+    <Box sx={{ p: 0, mt: mtCustom, marginRight: "50px", marginLeft: 0 }}>
       <Stack
         direction="row"
         alignItems="center"
@@ -95,8 +95,14 @@ export default function CustomTable({
         {primaryButton}
       </Stack>
       <Card elevation={3}>
-        <TableContainer sx={{ minWidth: 800 }}>
-          <Table>
+        <TableContainer
+          sx={{
+            width: 900,
+            height: "400px",
+            overflow: "auto",
+          }}
+        >
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
                 {TABLE_HEAD.map(({ id, tooltip, align }, i) =>

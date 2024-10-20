@@ -1,4 +1,4 @@
-import { Stack, useTheme } from "@mui/material";
+import { Box, Stack, useTheme } from "@mui/material";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -11,14 +11,16 @@ interface CalendarProps {
 
 export default function Calendar({ date, handleDateChange }: CalendarProps) {
   return (
-    <LocalizationProvider dateAdapter={AdapterMoment}>
-      <DateCalendar
-        sx={{
-          border: `1px solid`,
-        }}
-        value={date}
-        onChange={handleDateChange}
-      />
-    </LocalizationProvider>
+    <Box sx={{ marginTop: "80px" }}>
+      <LocalizationProvider dateAdapter={AdapterMoment}>
+        <DateCalendar
+          sx={{
+            border: `1px solid`,
+          }}
+          value={date}
+          onChange={handleDateChange}
+        />
+      </LocalizationProvider>
+    </Box>
   );
 }
