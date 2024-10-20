@@ -1,4 +1,6 @@
 import { useState } from "react";
+import axios from "axios";
+import { AxiosError } from "axios";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,6 +15,8 @@ import {
   Snackbar,
   SnackbarCloseReason,
   Alert,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 
 interface FormData {
@@ -24,6 +28,10 @@ interface FormData {
   confirmPassword: string;
   department: string;
   role: string;
+}
+
+interface ErrorResponse {
+  [key: string]: any;
 }
 
 const departmentChoice = [
@@ -53,14 +61,60 @@ function Register() {
 
   const [open, setOpen] = useState(false);
 
+  const [overlay, setOverlay] = useState(false);
+
+  const [apiError, setApiError] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
   const onSubmit = async (data: FormData) => {
-    console.log("Form submitted:", data);
-    localStorage.setItem("showsnackbar", "true");
-    navigate("/signin");
+    const registrationData = {
+      email: data.email,
+      password: data.password,
+      password2: data.confirmPassword,
+      first_name: data.firstName,
+      last_name: data.lastName,
+      department: data.department,
+      role: data.role,
+    };
+
+    let submitForm = true;
+    if (data.password !== data.confirmPassword) {
+      setError("confirmPassword", { message: "Passwords do not match." });
+      submitForm = false;
+    }
+
+    if (data.email !== data.confirmEmail) {
+      setError("confirmEmail", { message: "Emails do not match." });
+      submitForm = false;
+    }
+
+    if (!submitForm) return;
+    try {
+      setOverlay(true);
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/register/",
+        registrationData
+      );
+      console.log("Registration successful:", response.data);
+      localStorage.setItem("showsnackbar", "true");
+      navigate("/signin");
+    } catch (error) {
+      setOverlay(false);
+      console.error("Registration failed:", error);
+      const axiosError = error as AxiosError<ErrorResponse>;
+      if (
+        axiosError?.response?.data?.email?.[0].includes(
+          "user with this email already exists"
+        )
+      ) {
+        console.log("Email Already Exists");
+        setApiError("User with email already exists");
+      }
+      setOpen(true);
+    }
   };
 
   const handleBlur = (field: keyof FormData) => {
@@ -101,6 +155,8 @@ function Register() {
     if (reason === "clickaway") {
       return;
     }
+
+    setApiError(null);
 
     setOpen(false);
   };
@@ -285,13 +341,23 @@ function Register() {
               >
                 <Alert
                   onClose={handleClose}
-                  severity="success"
+                  severity="error"
                   variant="filled"
                   sx={{ width: "100%" }}
                 >
-                  This is a success Alert inside a Snackbar!
+                  {apiError ??
+                    "Error Creating Account. Please try again later."}
                 </Alert>
               </Snackbar>
+              <Backdrop
+                sx={(theme) => ({
+                  color: "#fff",
+                  zIndex: theme.zIndex.drawer + 1,
+                })}
+                open={overlay}
+              >
+                <CircularProgress color="inherit" />
+              </Backdrop>
             </Box>
           </form>
         </div>

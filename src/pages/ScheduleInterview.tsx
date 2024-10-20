@@ -1,22 +1,22 @@
-import React from 'react';
-import { Box, Grid } from '@mui/material';
-import Sidebar from '../components/Sidebar';
-import InterviewForm from '../components/InterviewForm';
+import React from "react";
+import { Box, Grid } from "@mui/material";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/NavBar";
+import InterviewForm from "../components/InterviewForm";
 
 const ScheduleInterviewForm: React.FC = () => {
   return (
     <Grid container>
       {/* Sidebar */}
-      <Grid item xs={3}>
+      {/* <Grid item xs={3}>
         <Sidebar />
-      </Grid>
-      
+      </Grid> */}
+      {/* <Navbar /> */}
+
       {/* Main content */}
-      <Grid item xs={9}>
-        <Box sx={{ padding: '20px' }}>
-          <InterviewForm />
-        </Box>
-      </Grid>
+      <Box sx={{ padding: "20px", margin: "auto" }}>
+        <InterviewForm />
+      </Box>
     </Grid>
   );
 };
