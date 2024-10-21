@@ -9,6 +9,8 @@ import { getInterviewsByDate } from "../dummy-data/mockInterviews";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import Navbar from "../components/NavBar";
+import { Modal, ModalClose } from "@mui/joy";
+import InterviewForm from "../components/InterviewForm";
 
 type AlignType =
   | "right"
@@ -84,6 +86,7 @@ const InterviewList = () => {
   const [date, setDate] = useState(moment());
   const [mockInterviews, setMockInterviews] = useState<Interview[]>([]);
   const [unassignedFilter, setUnassignedFilter] = useState(false); // Track unassigned state
+  const [openModal, setOpenModal] = useState(false); // State for modal visibility
 
   useEffect(() => {
     setMockInterviews(getInterviewsByDate(date.format("YYYY-MM-DD")));
@@ -108,6 +111,14 @@ const InterviewList = () => {
     setUnassignedFilter(event.target.checked);
   };
 
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
   return (
     <>
       <Navbar />
@@ -120,7 +131,7 @@ const InterviewList = () => {
                 variant="contained"
                 color="primary"
                 sx={{ gap: "4px", padding: "8px 24px 8px 20px" }}
-                onClick={() => navigate("/scheduleinterview")}
+                onClick={() => setOpenModal(true)}
               >
                 <AddIcon sx={{ fontSize: "1.25rem" }} />
                 Schedule
@@ -166,6 +177,27 @@ const InterviewList = () => {
           />
         </Box>
       </Container>
+      <Modal
+        open={openModal}
+        sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+      >
+        <Box
+          sx={{
+            maxWidth: 500,
+            borderRadius: "md",
+            p: 3,
+            boxShadow: "lg",
+            bgcolor: "background.paper",
+            position: "relative",
+          }}
+        >
+          <ModalClose
+            onClick={handleCloseModal}
+            sx={{ position: "absolute", top: 16, right: 16 }}
+          />
+          <InterviewForm />
+        </Box>
+      </Modal>
     </>
   );
 };
