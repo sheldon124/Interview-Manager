@@ -122,7 +122,7 @@ const InterviewList = () => {
   return (
     <>
       <Navbar />
-      <Container maxWidth="xl" sx={{ display: "flex", marginLeft: "40px" }}>
+      <Container sx={{ display: "flex", marginLeft: "40px" }}>
         <Box>
           <CustomTable
             title="Scheduled Interviews"
