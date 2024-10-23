@@ -13,7 +13,7 @@ const InterviewList: React.FC = () => {
     },
     {
       date: 'Thu 29',
-      time: '11:15 - 11:45',
+      time: '11:15 - 11:46',
       duration: '30min',
       location: 'Online',
       participants: ['Olivia', 'Liam', 'Alban'],
