@@ -1,7 +1,14 @@
 import Calendar from "../components/Calendar";
 import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Button, Box, Divider } from "@mui/material";
+import {
+  Container,
+  Button,
+  Box,
+  Divider,
+  Alert,
+  Snackbar,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import moment from "moment";
 import CustomTable from "../components/CustomTable";
@@ -88,6 +95,13 @@ const InterviewList = () => {
   const [unassignedFilter, setUnassignedFilter] = useState(false); // Track unassigned state
   const [openModal, setOpenModal] = useState(false); // State for modal visibility
 
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
+
   useEffect(() => {
     setMockInterviews(getInterviewsByDate(date.format("YYYY-MM-DD")));
   }, []);
@@ -117,6 +131,10 @@ const InterviewList = () => {
 
   const handleCloseModal = () => {
     setOpenModal(false);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   return (
@@ -195,9 +213,35 @@ const InterviewList = () => {
             onClick={handleCloseModal}
             sx={{ position: "absolute", top: 16, right: 16 }}
           />
-          <InterviewForm />
+          <InterviewForm
+            postApiCallback={(message: string) => {
+              setOpenModal(false);
+              if (message === "success") {
+                setSnackbarMessage("Interview scheduled successfully.");
+                setSnackbarSeverity("success");
+              } else {
+                setSnackbarMessage(message);
+                setSnackbarSeverity("error");
+              }
+              setSnackbarOpen(true);
+            }}
+          />
         </Box>
       </Modal>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
