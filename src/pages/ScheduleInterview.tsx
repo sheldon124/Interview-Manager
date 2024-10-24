@@ -15,7 +15,7 @@ const ScheduleInterviewForm: React.FC = () => {
 
       {/* Main content */}
       <Box sx={{ padding: "20px", margin: "auto" }}>
-        <InterviewForm />
+        {/* <InterviewForm /> */}
       </Box>
     </Grid>
   );

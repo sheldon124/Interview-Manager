@@ -9,11 +9,12 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  CircularProgress,
 } from "@mui/material";
-import { SelectChangeEvent } from "@mui/material/Select"; // Import SelectChangeEvent
+import { SelectChangeEvent } from "@mui/material/Select";
 import moment from "moment";
+import axios from "axios";
 
-// Define a type for the form data
 interface FormData {
   date: string;
   time: string;
@@ -25,7 +26,11 @@ interface FormData {
   notes: string;
 }
 
-const InterviewForm: React.FC = () => {
+interface InterviewFormProps {
+  postApiCallback: (message: string) => void;
+}
+
+const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
   const [formData, setFormData] = useState<FormData>({
     date: "",
     time: "",
@@ -37,6 +42,8 @@ const InterviewForm: React.FC = () => {
     notes: "",
   });
 
+  const [loading, setLoading] = useState(false); // Loading state
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -46,29 +53,59 @@ const InterviewForm: React.FC = () => {
     }
   };
 
-  const handleSelectChange = (e: SelectChangeEvent<"minutes" | "hours">) => {
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
     if (name && name in formData) {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true); // Set loading to true when starting the API call
 
     // Formatting time using moment.js
-    const formattedTime = moment(formData.time, "HH:mm").format("hh:mm A");
+    const formattedTime = moment(formData.time, "HH:mm").format("HH:mm:ss");
+    const durationInHours =
+      formData.durationUnit === "minutes"
+        ? `${Math.floor(Number(formData.durationValue) / 60)
+            .toString()
+            .padStart(2, "0")}:${(Number(formData.durationValue) % 60)
+            .toString()
+            .padStart(2, "0")}:00`
+        : `${formData.durationValue.padStart(2, "0")}:00:00`;
 
-    // Final form data with formatted time
-    const finalFormData = {
-      ...formData,
-      time: formattedTime, // Use moment to format time
-      duration: `${formData.durationValue} ${formData.durationUnit}`, // Combine duration and unit
+    // Prepare API request body
+    const requestBody = {
+      interviewee: {
+        first_name: formData.interviewee.split(" ")[0],
+        last_name: formData.interviewee.split(" ")[1],
+      },
+      date: formData.date,
+      time: formattedTime,
+      duration: durationInHours,
+      role: formData.role,
+      interviewer_name: formData.interviewers,
+      job_title: formData.role,
+      business_area: "Development", // Placeholder value
+      department: "Software", // Placeholder value
+      message: formData.notes,
     };
 
-    console.log(finalFormData);
-
-    // Form submission logic here (e.g., sending data to a server or storing it)
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/interview/schedule/",
+        requestBody
+      );
+      console.log("Interview scheduled successfully:", response.data);
+      postApiCallback("success"); // Call the onSuccess callback
+    } catch (error) {
+      console.error("Error scheduling interview:", error);
+      postApiCallback("Error scheduling interview. Please try again later.");
+      // Handle error (e.g., show error message)
+    } finally {
+      setLoading(false); // Set loading to false when the API call is finished
+    }
   };
 
   return (
@@ -125,7 +162,7 @@ const InterviewForm: React.FC = () => {
                   labelId="duration-unit-label"
                   name="durationUnit"
                   value={formData.durationUnit}
-                  onChange={handleSelectChange} // Now correctly typed
+                  onChange={handleSelectChange}
                   required
                   label="Unit"
                 >
@@ -143,7 +180,6 @@ const InterviewForm: React.FC = () => {
               name="interviewers"
               value={formData.interviewers}
               onChange={handleInputChange}
-              required
             />
           </Grid>
 
@@ -159,14 +195,26 @@ const InterviewForm: React.FC = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Role/Title"
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              required
-            />
+            <FormControl fullWidth>
+              <InputLabel id="role-label">Role/Title</InputLabel>
+              <Select
+                labelId="role-label"
+                name="role"
+                value={formData.role}
+                onChange={handleSelectChange}
+                required
+                label="Role/Title"
+              >
+                <MenuItem value="">
+                  <em>Select a role</em>
+                </MenuItem>
+                <MenuItem value="Manager">Manager</MenuItem>
+                <MenuItem value="Senior">Senior</MenuItem>
+                <MenuItem value="Junior">Junior</MenuItem>
+                <MenuItem value="Team Lead">Team Lead</MenuItem>
+                <MenuItem value="Intern">Intern</MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
 
           <Grid item xs={12}>
@@ -182,8 +230,17 @@ const InterviewForm: React.FC = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <Button type="submit" variant="contained" fullWidth>
-              Schedule Interview
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={loading} // Disable button while loading
+            >
+              {loading ? (
+                <CircularProgress size={24} sx={{ color: "white", mr: 1 }} />
+              ) : (
+                "Schedule Interview"
+              )}
             </Button>
           </Grid>
         </Grid>
