@@ -12,12 +12,16 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import moment from "moment";
 import CustomTable from "../components/CustomTable";
-import { getInterviewsByDate } from "../dummy-data/mockInterviews";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import Navbar from "../components/NavBar";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import { Modal, ModalClose } from "@mui/joy";
 import InterviewForm from "../components/InterviewForm";
+import axios from "axios";
 
 type AlignType =
   | "right"
@@ -84,16 +88,16 @@ interface Interview {
   duration: string;
   role: string;
   interviewer: string;
-  assigned: boolean;
   additional_notes: string;
 }
 
 const InterviewList = () => {
   const navigate = useNavigate();
   const [date, setDate] = useState(moment());
-  const [mockInterviews, setMockInterviews] = useState<Interview[]>([]);
+  const [interviews, setInterviews] = useState<Interview[]>([]);
   const [unassignedFilter, setUnassignedFilter] = useState(false); // Track unassigned state
   const [openModal, setOpenModal] = useState(false); // State for modal visibility
+  const [roleFilter, setRoleFilter] = useState("all");
 
   // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -102,22 +106,54 @@ const InterviewList = () => {
     "success"
   );
 
-  useEffect(() => {
-    setMockInterviews(getInterviewsByDate(date.format("YYYY-MM-DD")));
-  }, []);
-
-  useEffect(() => {
-    setUnassignedFilter(false);
-    setMockInterviews(getInterviewsByDate(date.format("YYYY-MM-DD")));
-  }, [date]);
-
-  useEffect(() => {
-    if (unassignedFilter) {
-      setMockInterviews(mockInterviews.filter((obj) => !obj.assigned));
-    } else {
-      setMockInterviews(getInterviewsByDate(date.format("YYYY-MM-DD")));
+  const fetchInterviewsByDate = async (date: String) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/interview/date/`,
+        {
+          params: { date },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      console.error("Error fetching interviews:", err);
+      return [];
     }
-  }, [unassignedFilter]);
+  };
+
+  useEffect(() => {
+    const fetchAndFilterInterviews = async () => {
+      if (!date) return;
+
+      const formattedDate = date.format("YYYY-MM-DD");
+      const interviewsData = await fetchInterviewsByDate(formattedDate);
+
+      // Apply filters
+      let filteredData = interviewsData;
+
+      // Filter by unassigned status
+      if (unassignedFilter) {
+        filteredData = filteredData.filter(
+          (obj: Interview) => !obj.interviewer
+        );
+      }
+
+      // Filter by role if a specific role is selected
+      if (roleFilter !== "all") {
+        filteredData = filteredData.filter(
+          (obj: Interview) => obj.role === roleFilter
+        );
+      }
+
+      setInterviews(filteredData);
+    };
+
+    fetchAndFilterInterviews();
+  }, [date, unassignedFilter, roleFilter]);
+
+  const handleRoleChange = (event: any) => {
+    setRoleFilter(event.target.value as string);
+  };
 
   const handleToggleUnassigned = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -166,9 +202,9 @@ const InterviewList = () => {
               "interviewer",
               "additional_notes",
             ]}
-            data={mockInterviews}
+            data={interviews}
           />
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -178,6 +214,22 @@ const InterviewList = () => {
               }
               label="Unassigned"
             />
+            <FormControl variant="outlined" size="small" sx={{ ml: 2 }}>
+              <InputLabel>Role</InputLabel>
+              <Select
+                value={roleFilter}
+                onChange={handleRoleChange}
+                label="Role"
+                sx={{ minWidth: 150 }}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="Manager">Manager</MenuItem>
+                <MenuItem value="Senior">Senior</MenuItem>
+                <MenuItem value="Junior">Junior</MenuItem>
+                <MenuItem value="Team Lead">Team Lead</MenuItem>
+                <MenuItem value="Intern">Intern</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </Box>
         <Divider sx={{ marginTop: "60px" }} orientation="vertical" flexItem />
