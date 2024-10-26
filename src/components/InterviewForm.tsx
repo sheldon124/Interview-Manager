@@ -75,21 +75,17 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
             .padStart(2, "0")}:00`
         : `${formData.durationValue.padStart(2, "0")}:00:00`;
 
-    // Prepare API request body
     const requestBody = {
-      interviewee: {
-        first_name: formData.interviewee.split(" ")[0],
-        last_name: formData.interviewee.split(" ")[1],
-      },
+      interviewee: formData.interviewee,
       date: formData.date,
       time: formattedTime,
       duration: durationInHours,
       role: formData.role,
-      interviewer_name: formData.interviewers,
+      interviewer: formData.interviewers,
       job_title: formData.role,
       business_area: "Development", // Placeholder value
       department: "Software", // Placeholder value
-      message: formData.notes,
+      additional_notes: formData.notes,
     };
 
     try {

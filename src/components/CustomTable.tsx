@@ -132,7 +132,7 @@ export default function CustomTable({
                         align="left"
                         key={key}
                         sx={{
-                          backgroundColor: !row.assigned
+                          backgroundColor: !row.interviewer
                             ? "#FFCCCB"
                             : "inherit",
                         }}
