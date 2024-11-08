@@ -20,12 +20,11 @@ interface FormData {
   time: string;
   durationValue: string;
   durationUnit: "minutes" | "hours";
+  department:string;
   interviewers: string;
   interviewee: string;
   role: string;
   notes: string;
-  email?: string; // Optional email field
-  phone?: string; // Optional phone number field
 }
 
 interface InterviewFormProps {
@@ -38,12 +37,11 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
     time: "",
     durationValue: "",
     durationUnit: "minutes",
+    department:"",
     interviewers: "",
     interviewee: "",
     role: "",
     notes: "",
-    email: "", // Default value for email
-    phone: "", // Default value for phone
   });
 
   const [loading, setLoading] = useState(false); // Loading state
@@ -85,13 +83,11 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
       time: formattedTime,
       duration: durationInHours,
       role: formData.role,
+      department: formData.department,
       interviewer: formData.interviewers,
       job_title: formData.role,
       business_area: "Development", // Placeholder value
-      department: "Software", // Placeholder value
       additional_notes: formData.notes,
-      email: formData.email, // Include email if available
-      phone: formData.phone, // Include phone number if available
     };
 
     try {
@@ -118,33 +114,31 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
 
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
-          <Grid item xs={12} container spacing={2}>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Date"
-                name="date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={formData.date}
-                onChange={handleInputChange}
-                inputProps={{ min: moment().format("YYYY-MM-DD") }}
-                required
-              />
-            </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Date"
+              name="date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={formData.date}
+              onChange={handleInputChange}
+              inputProps={{ min: moment().format("YYYY-MM-DD") }}
+              required
+            />
+          </Grid>
 
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Time"
-                name="time"
-                type="time"
-                InputLabelProps={{ shrink: true }}
-                value={formData.time}
-                onChange={handleInputChange}
-                required
-              />
-            </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Time"
+              name="time"
+              type="time"
+              InputLabelProps={{ shrink: true }}
+              value={formData.time}
+              onChange={handleInputChange}
+              required
+            />
           </Grid>
 
           <Grid item xs={12} container spacing={2}>
@@ -176,7 +170,28 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
               </FormControl>
             </Grid>
           </Grid>
+          {/* Department Dropdown */}
 
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel id="department-label">Department</InputLabel>
+              <Select
+                labelId="department-label"
+                name="department"
+                value={formData.department}
+                onChange={handleSelectChange}
+                required
+                label="Department"
+              >
+                <MenuItem value="Software">Software</MenuItem>
+                <MenuItem value="Testing">Testing</MenuItem>
+                <MenuItem value="Cyber-Security">Cyber-Security</MenuItem>
+                <MenuItem value="Finance">Finance</MenuItem>
+              </Select>
+            </FormControl>
+            
+            
+          </Grid>
           <Grid item xs={12}>
             <TextField
               fullWidth
@@ -197,11 +212,10 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
               required
             />
           </Grid>
-
           <Grid item xs={12}>
             <TextField
               fullWidth
-              label="Role"
+              label="Role/Title"
               name="role"
               value={formData.role}
               onChange={handleInputChange}
@@ -209,26 +223,28 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
             />
           </Grid>
 
-          {/* New Optional Fields */}
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Phone Number"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-            />
-          </Grid>
+          {/* <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel id="role-label">Role/Title</InputLabel>
+              <Select
+                labelId="role-label"
+                name="role"
+                value={formData.role}
+                onChange={handleSelectChange}
+                required
+                label="Role/Title"
+              >
+                <MenuItem value="">
+                  <em>Select a role</em>
+                </MenuItem>
+                <MenuItem value="Manager">Manager</MenuItem>
+                <MenuItem value="Senior">Senior</MenuItem>
+                <MenuItem value="Junior">Junior</MenuItem>
+                <MenuItem value="Team Lead">Team Lead</MenuItem>
+                <MenuItem value="Intern">Intern</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid> */}
 
           <Grid item xs={12}>
             <TextField
