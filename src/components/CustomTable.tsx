@@ -13,6 +13,7 @@ import {
   TablePagination,
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 
 // Define types for Table Head columns
@@ -41,9 +42,11 @@ interface CustomTableProps {
     | null;
   primaryButton?: JSX.Element;
   rightCellClickHandler?: (row: any) => void;
+  rowClickHandler?: (row: any) => void;
   footerTitle?: string;
   footerValue?: string;
   mtCustom?: number;
+  onDeleteRow?: (row: any) => void; // Add a prop for handling row deletion
 }
 
 export default function CustomTable({
@@ -54,9 +57,11 @@ export default function CustomTable({
   AlignRightTableCell = null,
   primaryButton = <></>,
   rightCellClickHandler = () => {},
+  rowClickHandler = () => {},
   footerTitle = "",
   footerValue = "",
   mtCustom = 5,
+  onDeleteRow = () => {}, // Default handler
 }: CustomTableProps) {
   // State for pagination
   const [page, setPage] = useState(0);
@@ -121,23 +126,25 @@ export default function CustomTable({
                     </TableCell>
                   )
                 )}
+                {/* Remove the text "Delete" and make the column smaller */}
+                <TableCell align="center" sx={{ width: 50 }} />
               </TableRow>
             </TableHead>
             <TableBody>
               {paginatedData.map((row, i) => (
-                <TableRow key={i} hover>
+                <TableRow
+                  key={i}
+                  onClick={() => rowClickHandler && rowClickHandler(row)}
+                  hover
+                >
                   {columnOrder &&
                     columnOrder.map((key) => (
-                      <TableCell
-                        align="left"
-                        key={key}
-                        sx={{
-                          backgroundColor: !row.interviewer
-                            ? "#FFCCCB"
-                            : "inherit",
-                        }}
-                      >
-                        {row[key]}
+                      <TableCell align="left" key={key} sx={{}}>
+                        {key === "interviewer" && row[key] == "" ? (
+                          <span style={{ color: "red" }}>(Unassigned)</span>
+                        ) : (
+                          row[key]
+                        )}
                       </TableCell>
                     ))}
                   {AlignRightTableCell && (
@@ -147,6 +154,22 @@ export default function CustomTable({
                       />
                     </TableCell>
                   )}
+                  {/* Add the Delete icon button in the last TableCell */}
+                  <TableCell align="center" sx={{ width: 50 }}>
+                    <Tooltip title="Delete" placement="top">
+                      <DeleteIcon
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click event from firing
+                          onDeleteRow(row); // Call the delete handler
+                        }}
+                        sx={{
+                          cursor: "pointer",
+                          fontSize: 20, // Adjust icon size if needed
+                          marginLeft: "-20px",
+                        }}
+                      />
+                    </Tooltip>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
