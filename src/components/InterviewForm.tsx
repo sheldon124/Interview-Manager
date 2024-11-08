@@ -20,28 +20,45 @@ interface FormData {
   time: string;
   durationValue: string;
   durationUnit: "minutes" | "hours";
-  department:string;
+  department: string;
   interviewers: string;
   interviewee: string;
   role: string;
+  contact: string;
   notes: string;
+}
+interface Interview {
+  id: number | null;
+  interviewee: string;
+  date: string;
+  time: string;
+  duration: string;
+  role: string;
+  department: string;
+  interviewer: string;
+  additional_notes: string;
 }
 
 interface InterviewFormProps {
-  postApiCallback: (message: string) => void;
+  postApiCallback: (message: string, newInterview: Interview) => void;
+  currId: number | null;
 }
 
-const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
+const InterviewForm: React.FC<InterviewFormProps> = ({
+  postApiCallback,
+  currId,
+}) => {
   const [formData, setFormData] = useState<FormData>({
     date: "",
     time: "",
     durationValue: "",
     durationUnit: "minutes",
-    department:"",
+    department: "",
     interviewers: "",
     interviewee: "",
     role: "",
     notes: "",
+    contact: "",
   });
 
   const [loading, setLoading] = useState(false); // Loading state
@@ -83,6 +100,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
       time: formattedTime,
       duration: durationInHours,
       role: formData.role,
+      contact: formData.contact,
       department: formData.department,
       interviewer: formData.interviewers,
       job_title: formData.role,
@@ -96,11 +114,37 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
         requestBody
       );
       console.log("Interview scheduled successfully:", response.data);
-      postApiCallback("success"); // Call the onSuccess callback
+      const interviewData: Interview = {
+        id: currId ? currId + 1 : null, // Set a default value if `id` is not available; adjust if needed
+        interviewee: requestBody.interviewee,
+        date: requestBody.date,
+        time: requestBody.time,
+        duration: requestBody.duration,
+        role: requestBody.role,
+        department: requestBody.department,
+        interviewer: requestBody.interviewer,
+        additional_notes: requestBody.additional_notes,
+      };
+      postApiCallback("success", interviewData); // Call the onSuccess callback
     } catch (error) {
       console.error("Error scheduling interview:", error);
-      postApiCallback("Error scheduling interview. Please try again later.");
-      // Handle error (e.g., show error message)
+
+      const emptyInterview: Interview = {
+        id: null,
+        interviewee: "",
+        date: "",
+        time: "",
+        duration: "",
+        role: "",
+        department: "",
+        interviewer: "",
+        additional_notes: "",
+      };
+
+      postApiCallback(
+        "Error scheduling interview. Please try again later.",
+        emptyInterview
+      );
     } finally {
       setLoading(false); // Set loading to false when the API call is finished
     }
@@ -189,8 +233,6 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
                 <MenuItem value="Finance">Finance</MenuItem>
               </Select>
             </FormControl>
-            
-            
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -215,6 +257,15 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
           <Grid item xs={12}>
             <TextField
               fullWidth
+              label="Interviewee Contact"
+              name="contact"
+              value={formData.contact}
+              onChange={handleInputChange}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
               label="Role/Title"
               name="role"
               value={formData.role}
@@ -222,29 +273,6 @@ const InterviewForm: React.FC<InterviewFormProps> = ({ postApiCallback }) => {
               required
             />
           </Grid>
-
-          {/* <Grid item xs={12}>
-            <FormControl fullWidth>
-              <InputLabel id="role-label">Role/Title</InputLabel>
-              <Select
-                labelId="role-label"
-                name="role"
-                value={formData.role}
-                onChange={handleSelectChange}
-                required
-                label="Role/Title"
-              >
-                <MenuItem value="">
-                  <em>Select a role</em>
-                </MenuItem>
-                <MenuItem value="Manager">Manager</MenuItem>
-                <MenuItem value="Senior">Senior</MenuItem>
-                <MenuItem value="Junior">Junior</MenuItem>
-                <MenuItem value="Team Lead">Team Lead</MenuItem>
-                <MenuItem value="Intern">Intern</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid> */}
 
           <Grid item xs={12}>
             <TextField

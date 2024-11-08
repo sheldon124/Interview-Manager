@@ -8,20 +8,24 @@ import {
   Divider,
   Alert,
   Snackbar,
+  Stack,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import moment from "moment";
+import moment, { Moment } from "moment";
 import CustomTable from "../components/CustomTable";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import Navbar from "../components/NavBar";
-import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { Modal, ModalClose } from "@mui/joy";
 import InterviewForm from "../components/InterviewForm";
 import axios from "axios";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
 
 type AlignType =
   | "right"
@@ -86,23 +90,28 @@ const TABLE_HEAD_IL: TableHeadItem[] = [
 ];
 
 interface Interview {
-  id: number;
+  id: number | null;
   interviewee: string;
   date: string;
   time: string;
   duration: string;
   role: string;
+  department: string;
   interviewer: string;
   additional_notes: string;
 }
 
 const InterviewList = () => {
   const navigate = useNavigate();
-  const [date, setDate] = useState(moment());
+  // const [date, setDate] = useState(moment());
+  const [date, setDate] = useState<Moment | null>(moment());
   const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [originalInterviews, setOriginalInterviews] = useState([]);
   const [unassignedFilter, setUnassignedFilter] = useState(false); // Track unassigned state
   const [openModal, setOpenModal] = useState(false); // State for modal visibility
   const [roleFilter, setRoleFilter] = useState("all");
+  const [deptFilter, setDeptFilter] = useState("all");
+  const [calendarFilter, setCalendarFilter] = useState("none");
 
   // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -127,37 +136,72 @@ const InterviewList = () => {
   };
 
   useEffect(() => {
-    const fetchAndFilterInterviews = async () => {
-      if (!date) return;
+    const fetchByCalendarFilters = async () => {
+      if (
+        calendarFilter !== "week" &&
+        calendarFilter !== "month" &&
+        calendarFilter !== "work-week"
+      )
+        return;
 
-      const formattedDate = date.format("YYYY-MM-DD");
-      const interviewsData = await fetchInterviewsByDate(formattedDate);
+      const response = await axios.get(
+        `http://localhost:8000/api/interview/${calendarFilter}/`
+      );
+      setInterviews(response.data);
+      setOriginalInterviews(response.data); // Store the original data for resetting purposes
+    };
+    fetchByCalendarFilters();
+  }, [calendarFilter]);
 
-      // Apply filters
-      let filteredData = interviewsData;
+  useEffect(() => {
+    const filterInterviews = () => {
+      let filteredData = [...originalInterviews];
 
-      // Filter by unassigned status
       if (unassignedFilter) {
         filteredData = filteredData.filter(
           (obj: Interview) => !obj.interviewer
         );
       }
 
-      // Filter by role if a specific role is selected
       if (roleFilter !== "all") {
         filteredData = filteredData.filter(
           (obj: Interview) => obj.role === roleFilter
         );
       }
 
+      if (deptFilter !== "all") {
+        filteredData = filteredData.filter(
+          (obj: Interview) => obj.department === deptFilter
+        );
+      }
+
       setInterviews(filteredData);
     };
 
-    fetchAndFilterInterviews();
-  }, [date, unassignedFilter, roleFilter]);
+    filterInterviews();
+  }, [unassignedFilter, roleFilter, deptFilter, originalInterviews]);
+
+  useEffect(() => {
+    const fetchInterviews = async () => {
+      if (!date) return;
+      setCalendarFilter("none"); // Disable calendar filter if a specific date is chosen
+
+      const formattedDate = date.format("YYYY-MM-DD");
+      const interviewsData = await fetchInterviewsByDate(formattedDate);
+
+      setInterviews(interviewsData);
+      setOriginalInterviews(interviewsData); // Update originalInterviews to reset filters correctly
+    };
+
+    fetchInterviews();
+  }, [date]);
 
   const handleRoleChange = (event: any) => {
     setRoleFilter(event.target.value as string);
+  };
+
+  const handleDeptChange = (event: any) => {
+    setDeptFilter(event.target.value as string);
   };
 
   const handleToggleUnassigned = (
@@ -166,16 +210,16 @@ const InterviewList = () => {
     setUnassignedFilter(event.target.checked);
   };
 
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
-
   const handleCloseModal = () => {
     setOpenModal(false);
   };
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
+  };
+
+  const handleChangeCalendar = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCalendarFilter((event.target as HTMLInputElement).value);
   };
 
   return (
@@ -236,22 +280,77 @@ const InterviewList = () => {
                 <MenuItem value="Intern">Intern</MenuItem>
               </Select>
             </FormControl>
+
+            <FormControl variant="outlined" size="small" sx={{ ml: 2 }}>
+              <InputLabel>Dept</InputLabel>
+              <Select
+                value={deptFilter}
+                onChange={handleDeptChange}
+                label="Dept"
+                sx={{ minWidth: 150 }}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="Software">Software</MenuItem>
+                <MenuItem value="Testing">Testing</MenuItem>
+                <MenuItem value="Cyber-Security">Cyber-Security</MenuItem>
+                <MenuItem value="Finance">Finance</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </Box>
         <Divider sx={{ marginTop: "60px" }} orientation="vertical" flexItem />
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "80px",
-            marginLeft: "50px",
-          }}
-        >
-          <Calendar
-            date={date}
-            handleDateChange={(newValue) => setDate(newValue)}
-          />
-        </Box>
+        <Stack>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "80px",
+              marginLeft: "50px",
+            }}
+          >
+            <Calendar
+              date={date}
+              handleDateChange={(newValue) => setDate(newValue)}
+            />
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              // justifyContent: "center",
+              marginTop: "40px",
+              marginLeft: "50px",
+            }}
+          >
+            <FormControl>
+              <RadioGroup
+                aria-labelledby="demo-controlled-radio-buttons-group"
+                name="controlled-radio-buttons-group"
+                value={calendarFilter}
+                onChange={handleChangeCalendar}
+                // row
+              >
+                <FormControlLabel
+                  value="work-week"
+                  control={<Radio />}
+                  label="Work Week"
+                />
+
+                <FormControlLabel
+                  value="week"
+                  control={<Radio />}
+                  label="Week"
+                />
+
+                <FormControlLabel
+                  value="month"
+                  control={<Radio />}
+                  label="Month"
+                />
+              </RadioGroup>
+            </FormControl>
+          </Box>
+        </Stack>
       </Container>
       <Modal
         open={openModal}
@@ -272,17 +371,23 @@ const InterviewList = () => {
             sx={{ position: "absolute", top: 16, right: 16 }}
           />
           <InterviewForm
-            postApiCallback={(message: string) => {
+            postApiCallback={(message: string, newInterview: Interview) => {
               setOpenModal(false);
               if (message === "success") {
                 setSnackbarMessage("Interview scheduled successfully.");
                 setSnackbarSeverity("success");
+                setInterviews((old) => [...old, newInterview]);
               } else {
                 setSnackbarMessage(message);
                 setSnackbarSeverity("error");
               }
               setSnackbarOpen(true);
             }}
+            currId={
+              interviews.length > 0
+                ? interviews[interviews.length - 1].id
+                : null
+            }
           />
         </Box>
       </Modal>
