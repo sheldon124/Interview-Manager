@@ -49,6 +49,20 @@ interface InterviewFormProps {
   interviewData: Interview | null;
 }
 
+function convertDuration(duration: string): [string, "hours" | "minutes"] {
+  // Split the duration string into hours and minutes
+  const [hours, minutes] = duration.split(":").map(Number);
+
+  // If there are no minutes, return the duration in hours
+  if (minutes === 0) {
+    return [`${hours}`, "hours"];
+  }
+
+  // Otherwise, return the total minutes
+  const totalMinutes = hours * 60 + minutes;
+  return [`${totalMinutes}`, "minutes"];
+}
+
 const InterviewForm: React.FC<InterviewFormProps> = ({
   postApiCallback,
   register,
@@ -77,15 +91,10 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
         date: interviewData.date,
         time: moment(interviewData.time, "HH:mm:ss").format("HH:mm"),
         durationValue: interviewData.duration
-          ? `${
-              Number(interviewData.duration.split(":")[0]) * 60 +
-              Number(interviewData.duration.split(":")[1])
-            }` // Ensure this is a string
+          ? convertDuration(interviewData.duration)[0]
           : "",
         durationUnit: interviewData.duration
-          ? interviewData.duration.includes(":")
-            ? "hours"
-            : "minutes"
+          ? convertDuration(interviewData.duration)[1]
           : "minutes",
         department: interviewData.department || "",
         interviewers: interviewData.interviewer || "",
