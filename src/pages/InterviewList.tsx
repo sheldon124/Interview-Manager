@@ -73,6 +73,11 @@ const TABLE_HEAD_IL: TableHeadItem[] = [
     align: "left",
   },
   {
+    id: "Department",
+    tooltip: "",
+    align: "left",
+  },
+  {
     id: "Interviewer",
     tooltip: "",
     align: "left",
@@ -259,6 +264,7 @@ const InterviewList = () => {
               "time",
               "duration",
               "role",
+              "department",
               "interviewer",
               "additional_notes",
             ]}
