@@ -165,6 +165,7 @@ export default function CustomTable({
                         sx={{
                           cursor: "pointer",
                           fontSize: 20, // Adjust icon size if needed
+                          marginLeft: "-20px",
                         }}
                       />
                     </Tooltip>

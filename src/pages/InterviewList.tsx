@@ -97,6 +97,7 @@ interface Interview {
   duration: string;
   role: string;
   interviewer: string;
+  department: string;
   additional_notes: string;
   email: string;
   phone: string;
