@@ -9,6 +9,10 @@ import {
   Alert,
   Snackbar,
   Stack,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import moment, { Moment } from "moment";
@@ -99,6 +103,8 @@ interface Interview {
   department: string;
   interviewer: string;
   additional_notes: string;
+  email: string;
+  phone: string;
 }
 
 const InterviewList = () => {
@@ -109,15 +115,25 @@ const InterviewList = () => {
   const [originalInterviews, setOriginalInterviews] = useState([]);
   const [unassignedFilter, setUnassignedFilter] = useState(false); // Track unassigned state
   const [openModal, setOpenModal] = useState(false); // State for modal visibility
+  const [newInterview, setNewInterview] = useState(true); // If true, modal will display register form. Else edit
   const [roleFilter, setRoleFilter] = useState("all");
   const [deptFilter, setDeptFilter] = useState("all");
   const [calendarFilter, setCalendarFilter] = useState("none");
+  const [currentInterview, setCurrentInterview] = useState<Interview | null>(
+    null
+  ); // State for the current interview data
 
   // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
+  );
+
+  // Dialog state for deletion confirmation
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [interviewToDelete, setInterviewToDelete] = useState<Interview | null>(
+    null
   );
 
   const fetchInterviewsByDate = async (date: String) => {
@@ -221,6 +237,45 @@ const InterviewList = () => {
   const handleChangeCalendar = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCalendarFilter((event.target as HTMLInputElement).value);
   };
+  const openEditInterview = (interviewData: Interview) => {
+    console.log(interviewData);
+    setNewInterview(false);
+    setCurrentInterview(interviewData);
+    setOpenModal(true);
+  };
+
+  const handleDeleteInterview = (interviewData: Interview) => {
+    setInterviewToDelete(interviewData);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (interviewToDelete) {
+      try {
+        // Assuming there's an API for deleting the interview
+        await axios.delete(
+          `http://localhost:8000/api/interview/${interviewToDelete.id}`
+        );
+        setInterviews((prev) =>
+          prev.filter((interview) => interview.id !== interviewToDelete.id)
+        );
+        setSnackbarMessage("Interview deleted successfully.");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+      } catch (error) {
+        setSnackbarMessage("Failed to delete interview.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
+      setDeleteDialogOpen(false);
+      setInterviewToDelete(null); // Reset the interview to delete
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setInterviewToDelete(null); // Reset the interview to delete
+  };
 
   return (
     <>
@@ -234,7 +289,11 @@ const InterviewList = () => {
                 variant="contained"
                 color="primary"
                 sx={{ gap: "4px", padding: "8px 24px 8px 20px" }}
-                onClick={() => setOpenModal(true)}
+                onClick={() => {
+                  setNewInterview(true);
+                  setOpenModal(true);
+                  setCurrentInterview(null);
+                }}
               >
                 <AddIcon sx={{ fontSize: "1.25rem" }} />
                 Schedule
@@ -253,6 +312,8 @@ const InterviewList = () => {
               "additional_notes",
             ]}
             data={interviews}
+            rowClickHandler={openEditInterview}
+            onDeleteRow={handleDeleteInterview}
           />
           <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
             <FormControlLabel
@@ -354,7 +415,12 @@ const InterviewList = () => {
       </Container>
       <Modal
         open={openModal}
-        sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+        disableAutoFocus={true}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
         <Box
           sx={{
@@ -371,12 +437,28 @@ const InterviewList = () => {
             sx={{ position: "absolute", top: 16, right: 16 }}
           />
           <InterviewForm
+            register={newInterview}
             postApiCallback={(message: string, newInterview: Interview) => {
+              // postApiCallback={(message: string) => {
               setOpenModal(false);
               if (message === "success") {
                 setSnackbarMessage("Interview scheduled successfully.");
                 setSnackbarSeverity("success");
-                setInterviews((old) => [...old, newInterview]);
+                // setInterviews((old) => [...old, newInterview]);
+                const fetchInterviews = async () => {
+                  if (!date) return;
+                  setCalendarFilter("none"); // Disable calendar filter if a specific date is chosen
+
+                  const formattedDate = date.format("YYYY-MM-DD");
+                  const interviewsData = await fetchInterviewsByDate(
+                    formattedDate
+                  );
+
+                  setInterviews(interviewsData);
+                  setOriginalInterviews(interviewsData); // Update originalInterviews to reset filters correctly
+                };
+
+                fetchInterviews();
               } else {
                 setSnackbarMessage(message);
                 setSnackbarSeverity("error");
@@ -388,9 +470,26 @@ const InterviewList = () => {
                 ? interviews[interviews.length - 1].id
                 : null
             }
+            interviewData={currentInterview}
           />
         </Box>
       </Modal>
+
+      <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
+        <DialogTitle>Are you sure?</DialogTitle>
+        <DialogContent>
+          <p>Are you sure you want to delete this interview?</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            No
+          </Button>
+          <Button onClick={confirmDelete} color="secondary">
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
