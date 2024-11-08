@@ -438,13 +438,13 @@ const InterviewList = () => {
           />
           <InterviewForm
             register={newInterview}
-            postApiCallback={(message: string, newInterview: Interview) => {
+            postApiCallback={(message: string, newInterviewObj: Interview) => {
               // postApiCallback={(message: string) => {
               setOpenModal(false);
               if (message === "success") {
                 setSnackbarMessage("Interview scheduled successfully.");
                 setSnackbarSeverity("success");
-                // setInterviews((old) => [...old, newInterview]);
+                setInterviews((old) => [...old, newInterviewObj]);
                 const fetchInterviews = async () => {
                   if (!date) return;
                   setCalendarFilter("none"); // Disable calendar filter if a specific date is chosen

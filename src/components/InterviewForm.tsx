@@ -44,7 +44,7 @@ interface Interview {
 }
 
 interface InterviewFormProps {
-  postApiCallback: (message: string, interviewData: any) => void;
+  postApiCallback: (message: string, interviewDataObj: any) => void;
   currId: number | null;
   register: boolean;
   interviewData: Interview | null;
