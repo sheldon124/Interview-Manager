@@ -5,7 +5,7 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { Moment } from "moment";
 
 interface CalendarProps {
-  date: Moment;
+  date: Moment | null;
   handleDateChange: (newDate: Moment) => void;
 }
 

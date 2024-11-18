@@ -30,7 +30,7 @@ interface FormData {
 }
 
 interface Interview {
-  id: number;
+  id: number | null;
   interviewee: string;
   date: string;
   time: string;
@@ -44,7 +44,8 @@ interface Interview {
 }
 
 interface InterviewFormProps {
-  postApiCallback: (message: string) => void;
+  postApiCallback: (message: string, interviewDataObj: any) => void;
+  currId: number | null;
   register: boolean;
   interviewData: Interview | null;
 }
@@ -65,6 +66,7 @@ function convertDuration(duration: string): [string, "hours" | "minutes"] {
 
 const InterviewForm: React.FC<InterviewFormProps> = ({
   postApiCallback,
+  currId,
   register,
   interviewData,
 }) => {
@@ -164,8 +166,8 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
       job_title: formData.role,
       business_area: "Development", // Placeholder value
       additional_notes: formData.notes,
-      email: formData.email, // Include email if available
-      phone: formData.phone, // Include phone number if available
+      email: formData.email || "", // Include email if available
+      phone: formData.phone || "", // Include phone number if available
     };
 
     try {
@@ -174,11 +176,41 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
         requestBody
       );
       console.log("Interview scheduled successfully:", response.data);
-      postApiCallback("success"); // Call the onSuccess callback
+      const interviewData: Interview = {
+        id: currId ? currId + 1 : null, // Set a default value if `id` is not available; adjust if needed
+        interviewee: requestBody.interviewee,
+        date: requestBody.date,
+        time: requestBody.time,
+        duration: requestBody.duration,
+        role: requestBody.role,
+        department: requestBody.department,
+        interviewer: requestBody.interviewer,
+        email: requestBody.email,
+        phone: requestBody.phone,
+        additional_notes: requestBody.additional_notes,
+      };
+      postApiCallback("success", interviewData); // Call the onSuccess callback
     } catch (error) {
       console.error("Error scheduling interview:", error);
-      postApiCallback("Error scheduling interview. Please try again later.");
-      // Handle error (e.g., show error message)
+
+      const emptyInterview: Interview = {
+        id: null,
+        interviewee: "",
+        date: "",
+        time: "",
+        duration: "",
+        role: "",
+        department: "",
+        interviewer: "",
+        email: "",
+        phone: "",
+        additional_notes: "",
+      };
+
+      postApiCallback(
+        "Error scheduling interview. Please try again later.",
+        emptyInterview
+      );
     } finally {
       setLoading(false); // Set loading to false when the API call is finished
     }
@@ -241,7 +273,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
     // Check if there are any changes
     if (Object.keys(updatedFields).length === 0) {
       setLoading(false);
-      postApiCallback("No changes detected");
+      postApiCallback("No changes detected", null);
       return;
     }
 
@@ -250,7 +282,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
 
     if (!interviewId) {
       setLoading(false);
-      postApiCallback("Interview ID is missing");
+      postApiCallback("Interview ID is missing", null);
       return;
     }
 
@@ -261,10 +293,13 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
         updatedFields
       );
       console.log("Interview updated successfully:", response.data);
-      postApiCallback("success"); // Call the onSuccess callback
+      postApiCallback("success", response.data.interview); // Call the onSuccess callback
     } catch (error) {
       console.error("Error updating interview:", error);
-      postApiCallback("Error updating interview. Please try again later.");
+      postApiCallback(
+        "Error updating interview. Please try again later.",
+        null
+      );
       // Handle error (e.g., show error message)
     } finally {
       setLoading(false); // Set loading to false when the API call is finished
