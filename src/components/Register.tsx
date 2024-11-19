@@ -98,7 +98,6 @@ function Register() {
         "http://127.0.0.1:8000/api/register/",
         registrationData
       );
-      console.log("Registration successful:", response.data);
       localStorage.setItem("showsnackbar", "true");
       navigate("/signin");
     } catch (error) {
@@ -110,7 +109,6 @@ function Register() {
           "user with this email already exists"
         )
       ) {
-        console.log("Email Already Exists");
         setApiError("User with email already exists");
       }
       setOpen(true);

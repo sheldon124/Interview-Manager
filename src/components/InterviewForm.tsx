@@ -175,7 +175,6 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
         "http://127.0.0.1:8000/api/interview/schedule/",
         requestBody
       );
-      console.log("Interview scheduled successfully:", response.data);
       const interviewData: Interview = {
         id: currId ? currId + 1 : null, // Set a default value if `id` is not available; adjust if needed
         interviewee: requestBody.interviewee,
@@ -292,7 +291,6 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
         `http://127.0.0.1:8000/api/interview/${interviewId}/`,
         updatedFields
       );
-      console.log("Interview updated successfully:", response.data);
       postApiCallback("success", response.data.interview); // Call the onSuccess callback
     } catch (error) {
       console.error("Error updating interview:", error);

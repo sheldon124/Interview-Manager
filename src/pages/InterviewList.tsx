@@ -299,7 +299,6 @@ const InterviewList = () => {
     setCalendarFilter((event.target as HTMLInputElement).value);
   };
   const openEditInterview = (interviewData: Interview) => {
-    console.log(interviewData);
     setNewInterview(false);
     setCurrentInterview(interviewData);
     setOpenModal(true);
