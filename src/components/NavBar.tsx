@@ -84,19 +84,6 @@ const Navbar: React.FC = () => {
             >
               Interviews
             </Button>
-            <Button
-              component={Link}
-              to="/interviewees"
-              color="inherit"
-              // startIcon={<PersonIcon />}
-              sx={{
-                textDecoration: isActive("/interviewees")
-                  ? "underline"
-                  : "none",
-              }}
-            >
-              Interviewees
-            </Button>
           </Box>
           <IconButton
             size="large"
