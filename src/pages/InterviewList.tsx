@@ -109,8 +109,8 @@ interface Interview {
 
 const InterviewList = () => {
   const navigate = useNavigate();
-  // const [date, setDate] = useState(moment());
   const [date, setDate] = useState<Moment | null>(moment());
+  const [view, setView] = useState<"day" | "week" | "month">("day");
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [originalInterviews, setOriginalInterviews] = useState([]);
   const [unassignedFilter, setUnassignedFilter] = useState(false); // Track unassigned state
@@ -147,6 +147,36 @@ const InterviewList = () => {
       return response.data;
     } catch (err) {
       console.error("Error fetching interviews:", err);
+      return [];
+    }
+  };
+
+  const fetchInterviewsForWeek = async (startDate: string, endDate: string) => {
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/interview/date-range`,
+        {
+          params: { start_date: startDate, end_date: endDate },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      console.error("Error fetching weekly interviews:", err);
+      return [];
+    }
+  };
+
+  const fetchInterviewsForMonth = async (month: number, year: number) => {
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/interview/month`,
+        {
+          params: { month: month.toString().padStart(2, "0"), year },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      console.error("Error fetching monthly interviews:", err);
       return [];
     }
   };
@@ -197,20 +227,51 @@ const InterviewList = () => {
     filterInterviews();
   }, [unassignedFilter, roleFilter, deptFilter, originalInterviews]);
 
+  // useEffect(() => {
+  //   const fetchInterviews = async () => {
+  //     if (!date) return;
+  //     setCalendarFilter("none"); // Disable calendar filter if a specific date is chosen
+
+  //     const formattedDate = date.format("YYYY-MM-DD");
+  //     const interviewsData = await fetchInterviewsByDate(formattedDate);
+
+  //     setInterviews(interviewsData);
+  //     setOriginalInterviews(interviewsData); // Update originalInterviews to reset filters correctly
+  //   };
+
+  //   fetchInterviews();
+  // }, [date]);
+
   useEffect(() => {
-    const fetchInterviews = async () => {
+    const fetchInterviewsData = async () => {
       if (!date) return;
-      setCalendarFilter("none"); // Disable calendar filter if a specific date is chosen
 
-      const formattedDate = date.format("YYYY-MM-DD");
-      const interviewsData = await fetchInterviewsByDate(formattedDate);
-
-      setInterviews(interviewsData);
-      setOriginalInterviews(interviewsData); // Update originalInterviews to reset filters correctly
+      if (view === "day") {
+        // Fetch interviews for the specific day
+        const formattedDate = date.format("YYYY-MM-DD");
+        const interviewsData = await fetchInterviewsByDate(formattedDate);
+        setInterviews(interviewsData);
+        setOriginalInterviews(interviewsData);
+      } else if (view === "week") {
+        // Fetch interviews for the week
+        const startDate = date.startOf("week").format("YYYY-MM-DD");
+        const endDate = date.endOf("week").format("YYYY-MM-DD");
+        const interviewsData = await fetchInterviewsForWeek(startDate, endDate);
+        setInterviews(interviewsData);
+        setOriginalInterviews(interviewsData);
+      } else if (view === "month") {
+        // Fetch interviews for the month
+        const interviewsData = await fetchInterviewsForMonth(
+          date.month() + 1,
+          date.year()
+        );
+        setInterviews(interviewsData);
+        setOriginalInterviews(interviewsData);
+      }
     };
 
-    fetchInterviews();
-  }, [date]);
+    fetchInterviewsData();
+  }, [view, date]);
 
   const handleRoleChange = (event: any) => {
     setRoleFilter(event.target.value as string);
@@ -371,7 +432,10 @@ const InterviewList = () => {
           >
             <Calendar
               date={date}
-              handleDateChange={(newValue) => setDate(newValue)}
+              handleDateChange={(newValue) => {
+                setDate(newValue);
+              }}
+              view={view}
             />
           </Box>
 
@@ -385,17 +449,16 @@ const InterviewList = () => {
           >
             <FormControl>
               <RadioGroup
+                row
                 aria-labelledby="demo-controlled-radio-buttons-group"
                 name="controlled-radio-buttons-group"
-                value={calendarFilter}
-                onChange={handleChangeCalendar}
+                value={view}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setView(event.target.value as "day" | "week" | "month")
+                }
                 // row
               >
-                <FormControlLabel
-                  value="work-week"
-                  control={<Radio />}
-                  label="Work Week"
-                />
+                <FormControlLabel value="day" control={<Radio />} label="Day" />
 
                 <FormControlLabel
                   value="week"
