@@ -103,20 +103,15 @@ export default function Calendar({
   useEffect(() => {
     if (date) {
       const currentDate = moment(); // If date prop is not passed, use current date
-      console.log("here");
       if (
         view == "week" &&
         date.format("YYYY-MM-DD") !== date.startOf("week").format("YYYY-MM-DD")
       ) {
-        console.log(date.format("YYYY-MM-DD"));
-        console.log(date.startOf("week").format("YYYY-MM-DD"));
         handleWeekSelection(currentDate);
       } else if (
         view !== "week" &&
         date.format("YYYY-MM-DD") !== currentDate.format("YYYY-MM-DD")
       ) {
-        console.log("this-" + date.format("YYYY-MM-DD"));
-        console.log("curr-" + currentDate.format("YYYY-MM-DD"));
         setSelectedDay(currentDate);
         handleDateChange(currentDate);
       }
