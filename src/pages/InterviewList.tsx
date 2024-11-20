@@ -111,6 +111,38 @@ interface Interview {
   phone: string;
 }
 
+const scheduleInOutlookWeb = (interview: Interview) => {
+  const subject = `Interview with ${interview.interviewee}`;
+  const startDateTime = new Date(
+    `${interview.date}T${interview.time}`
+  ).toISOString(); // Start time in ISO format
+
+  // Parse duration from hh:mm:ss format
+  const [hours, minutes, seconds] = interview.duration.split(":").map(Number);
+  const durationInMilliseconds = (hours * 3600 + minutes * 60 + seconds) * 1000;
+
+  // Calculate end time
+  const endDateTime = new Date(
+    new Date(`${interview.date}T${interview.time}`).getTime() +
+      durationInMilliseconds
+  ).toISOString();
+
+  const location = "Online";
+  const body = `Interview Details:\n\nRole: ${interview.role}\nDepartment: ${interview.department}\nAdditional Notes: ${interview.additional_notes}`;
+
+  // URL for creating a new calendar event on Outlook Web
+  const outlookUrl = `https://outlook.office.com/calendar/deeplink/compose?subject=${encodeURIComponent(
+    subject
+  )}&startdt=${encodeURIComponent(startDateTime)}&enddt=${encodeURIComponent(
+    endDateTime
+  )}&location=${encodeURIComponent(location)}&body=${encodeURIComponent(
+    body
+  )}&to=${encodeURIComponent(interview.email)}`;
+
+  // Open the URL in a new tab
+  window.open(outlookUrl, "_blank");
+};
+
 const InterviewList = () => {
   const navigate = useNavigate();
   const [date, setDate] = useState<Moment | null>(moment());
@@ -594,8 +626,9 @@ const InterviewList = () => {
                       <Typography variant="body1">
                         <strong>Email:</strong>{" "}
                         <a
-                          href={`mailto:${currentInterview.email}`}
+                          href="#"
                           style={{ textDecoration: "underline", color: "blue" }}
+                          onClick={() => scheduleInOutlookWeb(currentInterview)}
                         >
                           {currentInterview.email}
                         </a>
