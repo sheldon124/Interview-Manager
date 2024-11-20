@@ -389,7 +389,6 @@ const InterviewList = () => {
             data={interviews}
             rowClickHandler={(interviewData) => {
               setCurrentInterview(interviewData);
-              console.log(interviewData);
               setOpenDetailsModal(true);
             }}
             onDeleteRow={handleDeleteInterview}
@@ -683,7 +682,6 @@ const InterviewList = () => {
                 </>
               ) : null}
 
-              {/* Action Buttons */}
               <Box
                 sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}
               >
