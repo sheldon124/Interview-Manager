@@ -310,7 +310,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
   };
 
   return (
-    <Box sx={{ maxWidth: 600, margin: "auto", mt: 4 }}>
+    <Box sx={{ maxWidth: 600, margin: "auto" }}>
       <Typography variant="h4" gutterBottom>
         {register ? "Schedule an Interview" : "Modify Interview"}
       </Typography>
