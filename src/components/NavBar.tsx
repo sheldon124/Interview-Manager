@@ -47,7 +47,6 @@ const Navbar: React.FC = () => {
         horizontal: "right",
       }}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
       <MenuItem onClick={handleLogout}>Logout</MenuItem>
     </Menu>
   );

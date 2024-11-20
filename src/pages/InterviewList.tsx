@@ -13,6 +13,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import moment, { Moment } from "moment";
@@ -115,6 +119,7 @@ const InterviewList = () => {
   const [originalInterviews, setOriginalInterviews] = useState([]);
   const [unassignedFilter, setUnassignedFilter] = useState(false); // Track unassigned state
   const [openModal, setOpenModal] = useState(false); // State for modal visibility
+  const [openDetailsModal, setOpenDetailsModal] = useState(false);
   const [newInterview, setNewInterview] = useState(true); // If true, modal will display register form. Else edit
   const [roleFilter, setRoleFilter] = useState("all");
   const [deptFilter, setDeptFilter] = useState("all");
@@ -299,6 +304,7 @@ const InterviewList = () => {
     setCalendarFilter((event.target as HTMLInputElement).value);
   };
   const openEditInterview = (interviewData: Interview) => {
+    setOpenDetailsModal(false);
     setNewInterview(false);
     setCurrentInterview(interviewData);
     setOpenModal(true);
@@ -337,6 +343,15 @@ const InterviewList = () => {
     setInterviewToDelete(null); // Reset the interview to delete
   };
 
+  const openDetails = (interview: Interview) => {
+    setCurrentInterview(interview); // Set the selected interview
+    setOpenDetailsModal(true); // Open the details modal
+  };
+
+  const closeModals = () => {
+    setOpenDetailsModal(false); // Close the details modal
+  };
+
   return (
     <>
       <Navbar />
@@ -372,7 +387,10 @@ const InterviewList = () => {
               "additional_notes",
             ]}
             data={interviews}
-            rowClickHandler={openEditInterview}
+            rowClickHandler={(interviewData) => {
+              setCurrentInterview(interviewData);
+              setOpenDetailsModal(true);
+            }}
             onDeleteRow={handleDeleteInterview}
           />
           <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
@@ -496,7 +514,7 @@ const InterviewList = () => {
         >
           <ModalClose
             onClick={handleCloseModal}
-            sx={{ position: "absolute", top: 16, right: 16 }}
+            sx={{ position: "absolute" }}
           />
           <InterviewForm
             register={newInterview}
@@ -534,6 +552,160 @@ const InterviewList = () => {
             }
             interviewData={currentInterview}
           />
+        </Box>
+      </Modal>
+      <Modal open={openDetailsModal} disableAutoFocus={true}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)", // Center the modal
+            maxWidth: 600,
+            width: "100%", // Ensure responsiveness up to the max width
+            p: 3,
+            backgroundColor: "white",
+            borderRadius: 2,
+            boxShadow: 24,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+            Interview Details
+          </Typography>
+
+          {currentInterview && (
+            <>
+              {/* Personal Information Section */}
+              <Card sx={{ mb: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Personal Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body1">
+                        <strong>Interviewee:</strong>{" "}
+                        {currentInterview.interviewee}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body1">
+                        <strong>Email:</strong>{" "}
+                        <a
+                          href={`mailto:${currentInterview.email}`}
+                          style={{ textDecoration: "underline", color: "blue" }}
+                        >
+                          {currentInterview.email}
+                        </a>
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body1">
+                        <strong>Phone:</strong>{" "}
+                        <a
+                          href={`tel:${currentInterview.phone}`}
+                          style={{ color: "blue", textDecoration: "none" }}
+                        >
+                          {currentInterview.phone}
+                        </a>
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              <Divider sx={{ mb: 2 }} />
+
+              {/* Interview Details Section */}
+              <Card sx={{ mb: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Interview Details
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body1">
+                        <strong>Role:</strong> {currentInterview.role}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body1">
+                        <strong>Department:</strong>{" "}
+                        {currentInterview.department}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body1">
+                        <strong>Interviewer:</strong>{" "}
+                        {currentInterview.interviewer}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body1">
+                        <strong>Date:</strong>{" "}
+                        {moment(currentInterview.date).format("MMMM Do, YYYY")}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body1">
+                        <strong>Time:</strong>{" "}
+                        {moment(currentInterview.time, "HH:mm:ss").format(
+                          "h:mm A"
+                        )}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body1">
+                        <strong>Duration:</strong> {currentInterview.duration}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              {currentInterview.additional_notes ? (
+                <>
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Card sx={{ mb: 2 }}>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                        Additional Notes
+                      </Typography>
+                      <Typography variant="body1">
+                        {currentInterview.additional_notes}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : null}
+
+              <Box
+                sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}
+              >
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={closeModals}
+                >
+                  Close
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() =>
+                    currentInterview
+                      ? openEditInterview(currentInterview)
+                      : null
+                  }
+                >
+                  Edit
+                </Button>
+              </Box>
+            </>
+          )}
         </Box>
       </Modal>
 
