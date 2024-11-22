@@ -33,7 +33,7 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
+import { BACKEND_URL } from "../constants";
 
 type AlignType =
   | "right"
@@ -52,7 +52,7 @@ interface TableHeadItem {
 const TABLE_HEAD_IL: TableHeadItem[] = [
   {
     id: "ID",
-    tooltip: "Interview ID",
+    tooltip: "",
     align: "left",
   },
   {
@@ -81,7 +81,7 @@ const TABLE_HEAD_IL: TableHeadItem[] = [
     align: "left",
   },
   {
-    id: "Department",
+    id: "Dept",
     tooltip: "",
     align: "left",
   },
@@ -91,7 +91,7 @@ const TABLE_HEAD_IL: TableHeadItem[] = [
     align: "left",
   },
   {
-    id: "Additional Notes",
+    id: "Notes",
     tooltip: "",
     align: "left",
   },
@@ -175,12 +175,9 @@ const InterviewList = () => {
 
   const fetchInterviewsByDate = async (date: String) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8000/api/interview/date/`,
-        {
-          params: { date },
-        }
-      );
+      const response = await axios.get(`${BACKEND_URL}/api/interview/date/`, {
+        params: { date },
+      });
       return response.data;
     } catch (err) {
       console.error("Error fetching interviews:", err);
@@ -191,7 +188,7 @@ const InterviewList = () => {
   const fetchInterviewsForWeek = async (startDate: string, endDate: string) => {
     try {
       const response = await axios.get(
-        `http://127.0.0.1:8000/api/interview/date-range`,
+        `${BACKEND_URL}/api/interview/date-range`,
         {
           params: { start_date: startDate, end_date: endDate },
         }
@@ -205,12 +202,9 @@ const InterviewList = () => {
 
   const fetchInterviewsForMonth = async (month: number, year: number) => {
     try {
-      const response = await axios.get(
-        `http://127.0.0.1:8000/api/interview/month`,
-        {
-          params: { month: month.toString().padStart(2, "0"), year },
-        }
-      );
+      const response = await axios.get(`${BACKEND_URL}/api/interview/month`, {
+        params: { month: month.toString().padStart(2, "0"), year },
+      });
       return response.data;
     } catch (err) {
       console.error("Error fetching monthly interviews:", err);
@@ -228,7 +222,7 @@ const InterviewList = () => {
         return;
 
       const response = await axios.get(
-        `http://localhost:8000/api/interview/${calendarFilter}/`
+        `${BACKEND_URL}/api/interview/${calendarFilter}/`
       );
       setInterviews(response.data);
       setOriginalInterviews(response.data); // Store the original data for resetting purposes
@@ -352,7 +346,7 @@ const InterviewList = () => {
       try {
         // Assuming there's an API for deleting the interview
         await axios.delete(
-          `http://localhost:8000/api/interview/${interviewToDelete.id}`
+          `${BACKEND_URL}/api/interview/${interviewToDelete.id}/`
         );
         setInterviews((prev) =>
           prev.filter((interview) => interview.id !== interviewToDelete.id)
@@ -707,9 +701,22 @@ const InterviewList = () => {
                       <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                         Additional Notes
                       </Typography>
-                      <Typography variant="body1">
+                      {/* <Typography variant="body1">
                         {currentInterview.additional_notes}
-                      </Typography>
+                      </Typography> */}
+                      <Box
+                        sx={{
+                          maxHeight: "150px", // Set a fixed height for the scrollable area
+                          overflow: "auto", // Enable scrolling for overflowing content
+                          border: "1px solid #e0e0e0", // Optional: Add a border for better distinction
+                          padding: "8px", // Optional: Add inner padding
+                          borderRadius: "4px", // Optional: Rounded corners
+                        }}
+                      >
+                        <Typography variant="body1">
+                          {currentInterview.additional_notes}
+                        </Typography>
+                      </Box>
                     </CardContent>
                   </Card>
                 </>

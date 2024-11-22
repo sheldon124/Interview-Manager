@@ -107,12 +107,12 @@ export default function CustomTable({
             overflow: "auto",
           }}
         >
-          <Table stickyHeader>
+          <Table stickyHeader size="small">
             <TableHead>
               <TableRow>
                 {TABLE_HEAD.map(({ id, tooltip, align }, i) =>
                   tooltip !== "" ? (
-                    <TableCell align={align} key={i}>
+                    <TableCell align={align} key={i} sx={{ px: 1 }}>
                       <Stack direction="row" spacing={3}>
                         <Typography>{id}</Typography>
                         <Tooltip title={tooltip} placement="top">
@@ -121,7 +121,7 @@ export default function CustomTable({
                       </Stack>
                     </TableCell>
                   ) : (
-                    <TableCell align={align} key={i}>
+                    <TableCell align={align} key={i} sx={{ px: 1 }}>
                       <Typography>{id}</Typography>
                     </TableCell>
                   )
@@ -139,23 +139,36 @@ export default function CustomTable({
                 >
                   {columnOrder &&
                     columnOrder.map((key) => (
-                      <TableCell align="left" key={key} sx={{}}>
-                        {key === "interviewer" && row[key] == "" ? (
+                      <TableCell align="left" key={key} sx={{ px: 1 }}>
+                        {key === "interviewer" && row[key] === "" ? (
                           <span style={{ color: "red" }}>(Unassigned)</span>
+                        ) : key === "additional_notes" ? (
+                          <span
+                            style={{
+                              display: "inline-block", // Ensures it respects width constraints
+                              maxWidth: "80px", // Use the inherited default width
+                              overflow: "hidden", // Hide overflowing content
+                              textOverflow: "ellipsis", // Show "..." for truncated content
+                              whiteSpace: "nowrap", // Prevent line wrapping
+                            }}
+                            title={row[key]} // Optional: Show full text on hover
+                          >
+                            {row[key]}
+                          </span>
                         ) : (
                           row[key]
                         )}
                       </TableCell>
                     ))}
                   {AlignRightTableCell && (
-                    <TableCell align="right">
+                    <TableCell sx={{ px: 1 }} align="right">
                       <AlignRightTableCell
                         onClick={() => rightCellClickHandler(row)}
                       />
                     </TableCell>
                   )}
                   {/* Add the Delete icon button in the last TableCell */}
-                  <TableCell align="center" sx={{ width: 50 }}>
+                  <TableCell align="center" sx={{ width: 50, px: 1 }}>
                     <Tooltip title="Delete" placement="top">
                       <DeleteIcon
                         onClick={(e) => {

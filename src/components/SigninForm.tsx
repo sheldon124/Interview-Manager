@@ -112,9 +112,9 @@ const SigninForm: React.FC = () => {
               error={!!errors.password}
               helperText={errors.password ? errors.password.message : ""}
             />
-            <Link href="#" underline="hover">
+            {/* <Link href="#" underline="hover">
               I forgot my password
-            </Link>
+            </Link> */}
           </div>
 
           <Button type="submit" variant="contained">
