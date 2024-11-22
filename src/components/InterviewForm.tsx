@@ -379,13 +379,14 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
 
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel id="department-label">Department</InputLabel>
+              <InputLabel id="department-label" required>
+                Department
+              </InputLabel>
               <Select
                 labelId="department-label"
                 name="department"
                 value={formData.department}
                 onChange={handleSelectChange}
-                required
                 label="Department"
               >
                 <MenuItem value="Software">Software</MenuItem>
@@ -433,6 +434,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
+                required
               />
             </Grid>
 
@@ -443,6 +445,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
+                required
               />
             </Grid>
           </Grid>
