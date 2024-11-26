@@ -597,14 +597,14 @@ const InterviewList = () => {
             flexDirection: "column",
           }}
         >
-          <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, ml: 2 }}>
             Interview Details
           </Typography>
 
           {currentInterview && (
             <>
               {/* Personal Information Section */}
-              <Card sx={{ mb: 2 }}>
+              <div>
                 <CardContent>
                   <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                     Personal Information
@@ -641,12 +641,12 @@ const InterviewList = () => {
                     </Grid>
                   </Grid>
                 </CardContent>
-              </Card>
+              </div>
 
               <Divider sx={{ mb: 2 }} />
 
               {/* Interview Details Section */}
-              <Card sx={{ mb: 2 }}>
+              <div>
                 <CardContent>
                   <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                     Interview Details
@@ -690,13 +690,13 @@ const InterviewList = () => {
                     </Grid>
                   </Grid>
                 </CardContent>
-              </Card>
+              </div>
 
               {currentInterview.additional_notes ? (
                 <>
                   <Divider sx={{ mb: 2 }} />
 
-                  <Card sx={{ mb: 2 }}>
+                  <div>
                     <CardContent>
                       <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                         Additional Notes
@@ -708,7 +708,7 @@ const InterviewList = () => {
                         sx={{
                           maxHeight: "150px", // Set a fixed height for the scrollable area
                           overflow: "auto", // Enable scrolling for overflowing content
-                          border: "1px solid #e0e0e0", // Optional: Add a border for better distinction
+                          // border: "1px solid #e0e0e0", // Optional: Add a border for better distinction
                           padding: "8px", // Optional: Add inner padding
                           borderRadius: "4px", // Optional: Rounded corners
                         }}
@@ -718,7 +718,7 @@ const InterviewList = () => {
                         </Typography>
                       </Box>
                     </CardContent>
-                  </Card>
+                  </div>
                 </>
               ) : null}
 

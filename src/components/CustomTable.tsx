@@ -131,60 +131,71 @@ export default function CustomTable({
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedData.map((row, i) => (
-                <TableRow
-                  key={i}
-                  onClick={() => rowClickHandler && rowClickHandler(row)}
-                  hover
-                >
-                  {columnOrder &&
-                    columnOrder.map((key) => (
-                      <TableCell align="left" key={key} sx={{ px: 1 }}>
-                        {key === "interviewer" && row[key] === "" ? (
-                          <span style={{ color: "red" }}>(Unassigned)</span>
-                        ) : key === "additional_notes" ? (
-                          <span
-                            style={{
-                              display: "inline-block", // Ensures it respects width constraints
-                              maxWidth: "80px", // Use the inherited default width
-                              overflow: "hidden", // Hide overflowing content
-                              textOverflow: "ellipsis", // Show "..." for truncated content
-                              whiteSpace: "nowrap", // Prevent line wrapping
-                            }}
-                            title={row[key]} // Optional: Show full text on hover
-                          >
-                            {row[key]}
-                          </span>
-                        ) : (
-                          row[key]
-                        )}
+              {paginatedData.map((row, i) => {
+                // Check if the interview date is in the past
+                const isPast = new Date(`${row.date}T${row.time}`) < new Date(); // Assuming row.date is in a parseable date format
+
+                return (
+                  <TableRow
+                    key={i}
+                    onClick={() => rowClickHandler && rowClickHandler(row)}
+                    hover
+                    sx={{
+                      // Apply a "disabled" style if the interview date is in the past
+                      opacity: isPast ? 0.5 : 1, // Faded appearance for past dates
+                      backgroundColor: isPast ? "#f5f5f5" : "transparent", // Optional: Change the background color for past dates
+                    }}
+                  >
+                    {columnOrder &&
+                      columnOrder.map((key) => (
+                        <TableCell align="left" key={key} sx={{ px: 1 }}>
+                          {key === "interviewer" && row[key] === "" ? (
+                            <span style={{ color: "red" }}>(Unassigned)</span>
+                          ) : key === "additional_notes" ? (
+                            <span
+                              style={{
+                                display: "inline-block",
+                                maxWidth: "80px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                              title={row[key]}
+                            >
+                              {row[key]}
+                            </span>
+                          ) : (
+                            row[key]
+                          )}
+                        </TableCell>
+                      ))}
+                    {AlignRightTableCell && (
+                      <TableCell sx={{ px: 1 }} align="right">
+                        <AlignRightTableCell
+                          onClick={() => rightCellClickHandler(row)}
+                        />
                       </TableCell>
-                    ))}
-                  {AlignRightTableCell && (
-                    <TableCell sx={{ px: 1 }} align="right">
-                      <AlignRightTableCell
-                        onClick={() => rightCellClickHandler(row)}
-                      />
+                    )}
+                    {/* Delete icon button */}
+                    <TableCell align="center" sx={{ width: 50, px: 1 }}>
+                      <Tooltip title="Delete" placement="top">
+                        <DeleteIcon
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteRow(row);
+                          }}
+                          sx={{
+                            cursor: "pointer",
+                            fontSize: 20,
+                            marginLeft: "-20px",
+                            color: isPast ? "gray" : "black", // Disable the delete icon for past rows
+                          }}
+                        />
+                      </Tooltip>
                     </TableCell>
-                  )}
-                  {/* Add the Delete icon button in the last TableCell */}
-                  <TableCell align="center" sx={{ width: 50, px: 1 }}>
-                    <Tooltip title="Delete" placement="top">
-                      <DeleteIcon
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent row click event from firing
-                          onDeleteRow(row); // Call the delete handler
-                        }}
-                        sx={{
-                          cursor: "pointer",
-                          fontSize: 20, // Adjust icon size if needed
-                          marginLeft: "-20px",
-                        }}
-                      />
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
