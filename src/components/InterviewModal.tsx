@@ -11,6 +11,7 @@ import {
   CardContent,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import CancelIcon from "@mui/icons-material/Cancel";
 import moment from "moment";
 
 interface Interview {
@@ -64,6 +65,10 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
 
   // Handler for section edit mode toggle
   const toggleEditMode = (section: keyof typeof editMode) => {
+    if (editMode[section]) {
+      // Revert changes if we are already in edit mode and clicking edit again
+      setUpdatedInterview(interview); // Reset to the original data
+    }
     setEditMode((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -72,15 +77,10 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
     setUpdatedInterview((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Handle Save
-  const handleSave = () => {
+  // Handle Save for each section
+  const handleSectionSave = (section: keyof typeof editMode) => {
+    setEditMode((prev) => ({ ...prev, [section]: false })); // Exit edit mode for this section
     onSave(updatedInterview); // Pass the updated interview to the parent component
-    setEditMode({
-      personalInfo: false,
-      interviewDetails: false,
-      additionalNotes: false,
-    }); // Reset edit modes
-    onClose(); // Close modal after saving
   };
 
   // Handle Cancel (Reset to initial interview data)
@@ -126,7 +126,11 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
               onClick={() => toggleEditMode("personalInfo")}
               sx={{ mb: 1 }}
             >
-              <EditIcon />
+              {editMode.personalInfo ? (
+                <CancelIcon sx={{ color: "red" }} />
+              ) : (
+                <EditIcon />
+              )}
             </IconButton>
           </Box>
           <Grid container spacing={2}>
@@ -175,6 +179,18 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
               )}
             </Grid>
           </Grid>
+          {editMode.personalInfo && (
+            <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => handleSectionSave("personalInfo")}
+              >
+                Save Personal Info
+              </Button>
+            </Box>
+          )}
         </CardContent>
 
         <Divider sx={{ mb: 2 }} />
@@ -189,7 +205,11 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
               onClick={() => toggleEditMode("interviewDetails")}
               sx={{ mb: 1 }}
             >
-              <EditIcon />
+              {editMode.interviewDetails ? (
+                <CancelIcon sx={{ color: "red" }} />
+              ) : (
+                <EditIcon />
+              )}
             </IconButton>
           </Box>
           <Grid container spacing={2}>
@@ -259,9 +279,23 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
               )}
             </Grid>
           </Grid>
+          {editMode.interviewDetails && (
+            <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => handleSectionSave("interviewDetails")}
+              >
+                Save Interview Details
+              </Button>
+            </Box>
+          )}
         </CardContent>
 
         <Divider sx={{ mb: 2 }} />
+
+        {/* Additional Notes Section */}
         <CardContent>
           <Box display="flex" alignItems="center">
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
@@ -271,7 +305,11 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
               onClick={() => toggleEditMode("additionalNotes")}
               sx={{ mb: 1 }}
             >
-              <EditIcon />
+              {editMode.additionalNotes ? (
+                <CancelIcon sx={{ color: "red" }} />
+              ) : (
+                <EditIcon />
+              )}
             </IconButton>
           </Box>
           {editMode.additionalNotes ? (
@@ -299,15 +337,24 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
               </Typography>
             </Box>
           )}
+          {editMode.additionalNotes && (
+            <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => handleSectionSave("additionalNotes")}
+              >
+                Save Additional Notes
+              </Button>
+            </Box>
+          )}
         </CardContent>
 
-        {/* Buttons Section */}
+        {/* Close Button Section */}
         <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
           <Button variant="outlined" color="secondary" onClick={handleCancel}>
             Close
-          </Button>
-          <Button variant="contained" color="primary" onClick={handleSave}>
-            Save
           </Button>
         </Box>
       </Box>
