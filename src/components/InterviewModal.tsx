@@ -9,6 +9,10 @@ import {
   Grid,
   Divider,
   CardContent,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -35,17 +39,37 @@ interface InterviewModalProps {
   onSave: (updatedInterview: Interview) => void;
 }
 
+function convertDuration(duration: string): [string, "hours" | "minutes"] {
+  // Split the duration string into hours and minutes
+  const [hours, minutes] = duration.split(":").map(Number);
+
+  // If there are no minutes, return the duration in hours
+  if (minutes === 0) {
+    return [`${hours}`, "hours"];
+  }
+
+  // Otherwise, return the total minutes
+  const totalMinutes = hours * 60 + minutes;
+  return [`${totalMinutes}`, "minutes"];
+}
+
 const InterviewModal: React.FC<InterviewModalProps> = ({
   open,
   onClose,
   interview,
   onSave,
 }) => {
-  // State to manage the editable form fields
   const [updatedInterview, setUpdatedInterview] =
     useState<Interview>(interview);
 
-  // State to manage edit mode for each section
+  const [unit, setUnit] = useState<string>(
+    convertDuration(interview.duration)[1]
+  );
+
+  const [duration, setDuration] = useState<string>(
+    convertDuration(interview.duration)[0]
+  );
+
   const [editMode, setEditMode] = useState<{
     personalInfo: boolean;
     interviewDetails: boolean;
@@ -56,42 +80,77 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
     additionalNotes: false,
   });
 
-  // Sync updatedInterview with the interview prop whenever it changes
+  // Duration conversion helpers
+  const convertDurationToHoursMinutes = (duration: string): string => {
+    const [hours, minutes] = duration.split(":").map(Number);
+    if (minutes === 0) {
+      return `${hours}:00:00`;
+    }
+    const totalMinutes = hours * 60 + minutes;
+    return `${Math.floor(totalMinutes / 60)}:${totalMinutes % 60}:00`;
+  };
+
   useEffect(() => {
     if (open) {
-      setUpdatedInterview(interview); // Sync with the latest interview prop
+      setUpdatedInterview(interview);
+      setDuration(convertDuration(interview.duration)[0]);
+      setUnit(convertDuration(interview.duration)[1]);
     }
   }, [interview, open]);
 
-  // Handler for section edit mode toggle
   const toggleEditMode = (section: keyof typeof editMode) => {
     if (editMode[section]) {
-      // Revert changes if we are already in edit mode and clicking edit again
-      setUpdatedInterview(interview); // Reset to the original data
+      setUpdatedInterview(interview);
     }
     setEditMode((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Handler for saving field changes
-  const handleFieldChange = (field: keyof Interview, value: string) => {
-    setUpdatedInterview((prev) => ({ ...prev, [field]: value }));
+  const handleFieldChange = (
+    field: keyof Interview | "unit",
+    value: string
+  ) => {
+    if (field === "unit") {
+      const durationInHours =
+        value === "minutes"
+          ? `${Math.floor(Number(duration) / 60)
+              .toString()
+              .padStart(2, "0")}:${(Number(duration) % 60)
+              .toString()
+              .padStart(2, "0")}:00`
+          : `${duration.padStart(2, "0")}:00:00`;
+      setUpdatedInterview((prev) => ({
+        ...prev,
+        duration: durationInHours,
+      }));
+    } else if (field === "duration") {
+      const durationInHours =
+        unit === "minutes"
+          ? `${Math.floor(Number(value) / 60)
+              .toString()
+              .padStart(2, "0")}:${(Number(value) % 60)
+              .toString()
+              .padStart(2, "0")}:00`
+          : `${value.padStart(2, "0")}:00:00`;
+      setUpdatedInterview((prev) => ({
+        ...prev,
+        duration: durationInHours,
+      }));
+    } else setUpdatedInterview((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Handle Save for each section
   const handleSectionSave = (section: keyof typeof editMode) => {
-    setEditMode((prev) => ({ ...prev, [section]: false })); // Exit edit mode for this section
-    onSave(updatedInterview); // Pass the updated interview to the parent component
+    setEditMode((prev) => ({ ...prev, [section]: false }));
+    onSave(updatedInterview);
   };
 
-  // Handle Cancel (Reset to initial interview data)
   const handleCancel = () => {
-    setUpdatedInterview(interview); // Reset to the initial interview data
+    setUpdatedInterview(interview);
     setEditMode({
       personalInfo: false,
       interviewDetails: false,
       additionalNotes: false,
-    }); // Reset edit modes
-    onClose(); // Close modal without saving
+    });
+    onClose();
   };
 
   return (
@@ -101,9 +160,9 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
           position: "absolute",
           top: "50%",
           left: "50%",
-          transform: "translate(-50%, -50%)", // Center the modal
+          transform: "translate(-50%, -50%)",
           maxWidth: 600,
-          width: "100%", // Ensure responsiveness up to the max width
+          width: "100%",
           p: 3,
           backgroundColor: "white",
           borderRadius: 2,
@@ -264,9 +323,9 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
                 <TextField
                   fullWidth
                   label="Date"
-                  value={updatedInterview.date}
+                  value={moment(updatedInterview.date).format("YYYY-MM-DD")}
                   onChange={(e) => handleFieldChange("date", e.target.value)}
-                  type="datetime-local"
+                  type="date"
                   InputLabelProps={{
                     shrink: true,
                   }}
@@ -278,7 +337,61 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
                 </Typography>
               )}
             </Grid>
+
+            {/* Time and Duration Fields */}
+            <Grid item xs={12} sm={6}>
+              {editMode.interviewDetails ? (
+                <TextField
+                  fullWidth
+                  label="Time"
+                  value={updatedInterview.time}
+                  onChange={(e) => handleFieldChange("time", e.target.value)}
+                  type="time"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              ) : (
+                <Typography variant="body1">
+                  <strong>Time:</strong> {updatedInterview.time}
+                </Typography>
+              )}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {editMode.interviewDetails ? (
+                <>
+                  <TextField
+                    fullWidth
+                    label="Duration"
+                    value={duration}
+                    onChange={(e) => {
+                      setDuration(e.target.value);
+                      handleFieldChange("duration", e.target.value);
+                    }}
+                    type="number"
+                  />
+                  <FormControl fullWidth sx={{ mt: 1 }}>
+                    <InputLabel>Unit</InputLabel>
+                    <Select
+                      value={unit}
+                      onChange={(e) => {
+                        setUnit(e.target.value);
+                        handleFieldChange("unit", `${e.target.value}`);
+                      }}
+                    >
+                      <MenuItem value="hours">Hours</MenuItem>
+                      <MenuItem value="minutes">Minutes</MenuItem>
+                    </Select>
+                  </FormControl>
+                </>
+              ) : (
+                <Typography variant="body1">
+                  <strong>Duration:</strong> {`${duration} ${unit}`}
+                </Typography>
+              )}
+            </Grid>
           </Grid>
+
           {editMode.interviewDetails && (
             <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
               <Button
@@ -351,7 +464,7 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
           )}
         </CardContent>
 
-        {/* Close Button Section */}
+        {/* Close Button */}
         <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
           <Button variant="outlined" color="secondary" onClick={handleCancel}>
             Close
