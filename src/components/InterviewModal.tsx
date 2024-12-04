@@ -40,15 +40,12 @@ interface InterviewModalProps {
 }
 
 function convertDuration(duration: string): [string, "hours" | "minutes"] {
-  // Split the duration string into hours and minutes
   const [hours, minutes] = duration.split(":").map(Number);
 
-  // If there are no minutes, return the duration in hours
   if (minutes === 0) {
     return [`${hours}`, "hours"];
   }
 
-  // Otherwise, return the total minutes
   const totalMinutes = hours * 60 + minutes;
   return [`${totalMinutes}`, "minutes"];
 }
@@ -79,16 +76,6 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
     interviewDetails: false,
     additionalNotes: false,
   });
-
-  // Duration conversion helpers
-  const convertDurationToHoursMinutes = (duration: string): string => {
-    const [hours, minutes] = duration.split(":").map(Number);
-    if (minutes === 0) {
-      return `${hours}:00:00`;
-    }
-    const totalMinutes = hours * 60 + minutes;
-    return `${Math.floor(totalMinutes / 60)}:${totalMinutes % 60}:00`;
-  };
 
   useEffect(() => {
     if (open) {
@@ -338,7 +325,7 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
               )}
             </Grid>
 
-            {/* Time and Duration Fields */}
+            {/* Time and Duration Fields (Side by Side) */}
             <Grid item xs={12} sm={6}>
               {editMode.interviewDetails ? (
                 <TextField
@@ -357,32 +344,45 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
                 </Typography>
               )}
             </Grid>
-            <Grid item xs={12} sm={6}>
+
+            {/* Duration and Unit Fields Side by Side */}
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              container={editMode.interviewDetails ?? false}
+              spacing={editMode.interviewDetails ? 2 : 0}
+            >
               {editMode.interviewDetails ? (
                 <>
-                  <TextField
-                    fullWidth
-                    label="Duration"
-                    value={duration}
-                    onChange={(e) => {
-                      setDuration(e.target.value);
-                      handleFieldChange("duration", e.target.value);
-                    }}
-                    type="number"
-                  />
-                  <FormControl fullWidth sx={{ mt: 1 }}>
-                    <InputLabel>Unit</InputLabel>
-                    <Select
-                      value={unit}
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      label="Duration"
+                      value={duration}
                       onChange={(e) => {
-                        setUnit(e.target.value);
-                        handleFieldChange("unit", `${e.target.value}`);
+                        setDuration(e.target.value);
+                        handleFieldChange("duration", e.target.value);
                       }}
-                    >
-                      <MenuItem value="hours">Hours</MenuItem>
-                      <MenuItem value="minutes">Minutes</MenuItem>
-                    </Select>
-                  </FormControl>
+                      type="number"
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <FormControl fullWidth sx={{}}>
+                      <InputLabel>Unit</InputLabel>
+                      <Select
+                        value={unit}
+                        label="Unit"
+                        onChange={(e) => {
+                          setUnit(e.target.value);
+                          handleFieldChange("unit", `${e.target.value}`);
+                        }}
+                      >
+                        <MenuItem value="hours">Hours</MenuItem>
+                        <MenuItem value="minutes">Minutes</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
                 </>
               ) : (
                 <Typography variant="body1">
@@ -428,27 +428,18 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
           {editMode.additionalNotes ? (
             <TextField
               fullWidth
-              label="Additional Notes"
+              label="Notes"
+              multiline
+              rows={4}
               value={updatedInterview.additional_notes}
               onChange={(e) =>
                 handleFieldChange("additional_notes", e.target.value)
               }
-              multiline
-              minRows={3}
             />
           ) : (
-            <Box
-              sx={{
-                maxHeight: "150px",
-                overflow: "auto",
-                padding: "8px",
-                borderRadius: "4px",
-              }}
-            >
-              <Typography variant="body1">
-                {updatedInterview.additional_notes}
-              </Typography>
-            </Box>
+            <Typography variant="body1">
+              <strong>Notes:</strong> {updatedInterview.additional_notes}
+            </Typography>
           )}
           {editMode.additionalNotes && (
             <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
@@ -458,15 +449,14 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
                 size="small"
                 onClick={() => handleSectionSave("additionalNotes")}
               >
-                Save Additional Notes
+                Save Notes
               </Button>
             </Box>
           )}
         </CardContent>
 
-        {/* Close Button */}
-        <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
-          <Button variant="outlined" color="secondary" onClick={handleCancel}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+          <Button variant="outlined" onClick={handleCancel}>
             Close
           </Button>
         </Box>

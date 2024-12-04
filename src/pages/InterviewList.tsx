@@ -327,6 +327,40 @@ const InterviewList = () => {
     setDeleteDialogOpen(true);
   };
 
+  const handleSaveInterview = async (updatedInterview: Interview) => {
+    try {
+      // Make the PATCH API call to update the interview
+      const response = await axios.patch(
+        `http://127.0.0.1:8000/api/interview/${updatedInterview.id}/`,
+        updatedInterview
+      );
+
+      // Check if the update was successful
+      if (response.status === 200) {
+        // Optionally, update the local state with the updated interview
+        setInterviews((prevInterviews) =>
+          prevInterviews.map((interview) =>
+            interview.id === updatedInterview.id ? updatedInterview : interview
+          )
+        );
+
+        // Show a success message using Snackbar
+        setSnackbarMessage("Interview updated successfully.");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+
+        // Close the modal after saving
+        // closeModals();
+      }
+    } catch (error) {
+      // Handle any errors during the API call
+      console.error("Error updating interview:", error);
+      setSnackbarMessage("Failed to update interview.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
   const confirmDelete = async () => {
     if (interviewToDelete) {
       try {
@@ -569,183 +603,13 @@ const InterviewList = () => {
           />
         </Box>
       </Modal>
-      <Modal open={false} disableAutoFocus={true}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)", // Center the modal
-            maxWidth: 600,
-            width: "100%", // Ensure responsiveness up to the max width
-            p: 3,
-            backgroundColor: "white",
-            borderRadius: 2,
-            boxShadow: 24,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, ml: 2 }}>
-            Interview Details
-          </Typography>
-
-          {currentInterview && (
-            <>
-              {/* Personal Information Section */}
-              <div>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                    Personal Information
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body1">
-                        <strong>Interviewee:</strong>{" "}
-                        {currentInterview.interviewee}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body1">
-                        <strong>Email:</strong>{" "}
-                        <a
-                          href="#"
-                          style={{ textDecoration: "underline", color: "blue" }}
-                          onClick={() => scheduleInOutlookWeb(currentInterview)}
-                        >
-                          {currentInterview.email}
-                        </a>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body1">
-                        <strong>Phone:</strong>{" "}
-                        <a
-                          href={`tel:${currentInterview.phone}`}
-                          style={{ color: "blue", textDecoration: "none" }}
-                        >
-                          {currentInterview.phone}
-                        </a>
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </div>
-
-              <Divider sx={{ mb: 2 }} />
-
-              {/* Interview Details Section */}
-              <div>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                    Interview Details
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body1">
-                        <strong>Role:</strong> {currentInterview.role}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body1">
-                        <strong>Department:</strong>{" "}
-                        {currentInterview.department}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body1">
-                        <strong>Interviewer:</strong>{" "}
-                        {currentInterview.interviewer}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body1">
-                        <strong>Date:</strong>{" "}
-                        {moment(currentInterview.date).format("MMMM Do, YYYY")}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body1">
-                        <strong>Time:</strong>{" "}
-                        {moment(currentInterview.time, "HH:mm:ss").format(
-                          "h:mm A"
-                        )}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body1">
-                        <strong>Duration:</strong> {currentInterview.duration}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </div>
-
-              {currentInterview.additional_notes ? (
-                <>
-                  <Divider sx={{ mb: 2 }} />
-
-                  <div>
-                    <CardContent>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                        Additional Notes
-                      </Typography>
-                      {/* <Typography variant="body1">
-                        {currentInterview.additional_notes}
-                      </Typography> */}
-                      <Box
-                        sx={{
-                          maxHeight: "150px", // Set a fixed height for the scrollable area
-                          overflow: "auto", // Enable scrolling for overflowing content
-                          // border: "1px solid #e0e0e0", // Optional: Add a border for better distinction
-                          padding: "8px", // Optional: Add inner padding
-                          borderRadius: "4px", // Optional: Rounded corners
-                        }}
-                      >
-                        <Typography variant="body1">
-                          {currentInterview.additional_notes}
-                        </Typography>
-                      </Box>
-                    </CardContent>
-                  </div>
-                </>
-              ) : null}
-
-              <Box
-                sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}
-              >
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={closeModals}
-                >
-                  Close
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() =>
-                    currentInterview
-                      ? openEditInterview(currentInterview)
-                      : null
-                  }
-                >
-                  Edit
-                </Button>
-              </Box>
-            </>
-          )}
-        </Box>
-      </Modal>
 
       {currentInterview ? (
         <InterviewModal
           open={openDetailsModal}
           interview={currentInterview}
           onClose={closeModals}
-          onSave={(updatedInterview: Interview) =>
-            console.log(updatedInterview)
-          }
+          onSave={handleSaveInterview}
         />
       ) : null}
 
