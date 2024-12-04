@@ -60,7 +60,7 @@ export default function CustomTable({
   rowClickHandler = () => {},
   footerTitle = "",
   footerValue = "",
-  mtCustom = 5,
+  mtCustom = 3,
   onDeleteRow = () => {}, // Default handler
 }: CustomTableProps) {
   // State for pagination
@@ -87,12 +87,12 @@ export default function CustomTable({
   );
 
   return (
-    <Box sx={{ p: 0, mt: mtCustom, marginRight: "50px", marginLeft: 0 }}>
+    <Box sx={{ p: 0, mt: mtCustom, marginRight: "15px", marginLeft: 0 }}>
       <Stack
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        mb={3}
+        mb={1}
       >
         <Typography variant="h4" gutterBottom>
           {title}
@@ -102,12 +102,12 @@ export default function CustomTable({
       <Card elevation={3}>
         <TableContainer
           sx={{
-            width: 900,
-            height: "400px",
-            overflow: "auto",
+            width: "1070px", // Full-width or use a higher value
+            height: "515px", // Dynamic height based on content
+            overflow: "auto", // Keep scrolling if content overflows
           }}
         >
-          <Table stickyHeader size="small">
+          <Table stickyHeader size="medium">
             <TableHead>
               <TableRow>
                 {TABLE_HEAD.map(({ id, tooltip, align }, i) =>
