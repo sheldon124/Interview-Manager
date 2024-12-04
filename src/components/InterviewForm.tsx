@@ -429,9 +429,9 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               value={formData.interviewers}
               onChange={(e) => {
                 const inputValue = e.target.value;
-                handleInputChange(e);
-                const lastInput = inputValue.split(",").pop()?.trim();
-                if (lastInput) fetchSuggestions(lastInput);
+                handleInputChange(e); // Update the input value
+                const lastInput = inputValue.split(",").pop()?.trim(); // Get the last typed name
+                if (lastInput) fetchSuggestions(lastInput); // Fetch suggestions if last input is not empty
               }}
               onFocus={() => {
                 setActiveField("interviewers");
@@ -448,15 +448,15 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 {userSuggestions.map((suggestion) => (
                   <Chip
                     key={suggestion.id}
-                    label={`${suggestion.first_name} ${suggestion.last_name}`}
+                    label={`${suggestion.first_name} ${suggestion.last_name} (${suggestion.email})`}
                     size="small"
                     onClick={() => {
-                      const currentValues = formData.interviewers.split(",").map((val) => val.trim());
-                      currentValues.pop();
-                      const newValue = `${suggestion.first_name} ${suggestion.last_name}`;
+                      const currentValues = formData.interviewers.split(",").map((val) => val.trim()); // Split by commas
+                      currentValues.pop(); // Remove the last partially typed value
+                      const newValue = `${suggestion.email}`; // Use only the email
                       setFormData({
                         ...formData,
-                        interviewers: [...currentValues, newValue].join(", "),
+                        interviewers: [...currentValues, newValue].join(", "), // Replace the last input with email
                       });
                     }}
                     sx={{ cursor: "pointer" }}
@@ -472,37 +472,9 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               label="Interviewee"
               name="interviewee"
               value={formData.interviewee}
-              onChange={(e) => {
-                handleInputChange(e);
-                if (e.target.value.trim()) fetchSuggestions(e.target.value.trim());
-              }}
-              onFocus={(e) => {
-                setActiveField("interviewee");
-                if (formData.interviewee.trim()) fetchSuggestions(formData.interviewee.trim());
-              }}
-              onBlur={() => {
-                setTimeout(() => setActiveField(""), 200);
-              }}
+              onChange={handleInputChange}
               required
-            />
-            {activeField === "interviewee" && userSuggestions.length > 0 && (
-              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {userSuggestions.map((suggestion) => (
-                  <Chip
-                    key={suggestion.id}
-                    label={`${suggestion.first_name} ${suggestion.last_name}`}
-                    size="small"
-                    onClick={() =>
-                      setFormData({
-                        ...formData,
-                        interviewee: `${suggestion.first_name} ${suggestion.last_name}`,
-                      })
-                    }
-                    sx={{ cursor: "pointer" }}
-                  />
-                ))}
-              </Box>
-            )}
+              />
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -510,37 +482,9 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               label="Role/Title"
               name="role"
               value={formData.role}
-              onChange={(e) => {
-                handleInputChange(e);
-                if (e.target.value.trim()) fetchSuggestions(e.target.value.trim());
-              }}
-              onFocus={() => {
-                setActiveField("role");
-                if (formData.role.trim()) fetchSuggestions(formData.role.trim());
-              }}
-              onBlur={() => {
-                setTimeout(() => setActiveField(""), 200);
-              }}
-              required
-            />
-            {activeField === "role" && userSuggestions.length > 0 && (
-              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {userSuggestions.map((suggestion) => (
-                  <Chip
-                    key={suggestion.id}
-                    label={suggestion.job_title}
-                    size="small"
-                    onClick={() =>
-                      setFormData({
-                        ...formData,
-                        role: suggestion.job_title,
-                      })
-                    }
-                    sx={{ cursor: "pointer" }}
-                  />
-                ))}
-              </Box>
-            )}
+                onChange={handleInputChange}
+                required
+                />
           </Grid>
           <Grid item xs={12} container spacing={2}>
             <Grid item xs={6}>
@@ -548,42 +492,10 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 fullWidth
                 label="Email"
                 name="email"
-                value={formData.email ?? ""}
-                onChange={(e) => {
-                  handleInputChange(e);
-                  if (e.target.value.trim().length >= 3) {
-                    fetchSuggestions(e.target.value.trim());
-                  }
-                }}
-                onFocus={() => {
-                  setActiveField("email");
-                  if ((formData.email ?? "").trim().length >= 3) {
-                    fetchSuggestions((formData.email ?? "").trim());
-                  }
-                }}
-                onBlur={() => {
-                  setTimeout(() => setActiveField(""), 200);
-                }}
+                value={formData.email}
+                onChange={handleInputChange}
                 required
-              />
-              {activeField === "email" && userSuggestions.length > 0 && (
-                <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-                  {userSuggestions.map((suggestion) => (
-                    <Chip
-                      key={suggestion.id}
-                      label={suggestion.email}
-                      size="small"
-                      onClick={() =>
-                        setFormData({
-                          ...formData,
-                          email: suggestion.email,
-                        })
-                      }
-                      sx={{ cursor: "pointer" }}
-                    />
-                  ))}
-                </Box>
-              )}
+                />
             </Grid>
 
             <Grid item xs={6}>
@@ -591,42 +503,10 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 fullWidth
                 label="Phone Number"
                 name="phone"
-                value={formData.phone ?? ""}
-                onChange={(e) => {
-                  handleInputChange(e);
-                  if (e.target.value.trim().length >= 3) {
-                    fetchSuggestions(e.target.value.trim());
-                  }
-                }}
-                onFocus={() => {
-                  setActiveField("phone");
-                  if ((formData.phone ?? "").trim().length >= 3) {
-                    fetchSuggestions((formData.phone ?? "").trim());
-                  }
-                }}
-                onBlur={() => {
-                  setTimeout(() => setActiveField(""), 200);
-                }}
+                value={formData.phone}
+                onChange={handleInputChange}
                 required
-              />
-              {activeField === "phone" && userSuggestions.length > 0 && (
-                <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-                  {userSuggestions.map((suggestion) => (
-                    <Chip
-                      key={suggestion.id}
-                      label={suggestion.phone}
-                      size="small"
-                      onClick={() =>
-                        setFormData({
-                          ...formData,
-                          phone: suggestion.phone,
-                        })
-                      }
-                      sx={{ cursor: "pointer" }}
-                    />
-                  ))}
-                </Box>
-              )}
+                />
             </Grid>
           </Grid>
 
