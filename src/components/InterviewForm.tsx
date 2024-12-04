@@ -10,8 +10,10 @@ import {
   FormControl,
   InputLabel,
   CircularProgress,
+  Chip,
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material/Select";
+import Autocomplete from "@mui/material/Autocomplete";
 import moment from "moment";
 import axios from "axios";
 
@@ -84,6 +86,9 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
     phone: "", // Default value for phone
   });
 
+  const [userSuggestions, setUserSuggestions] = useState<any[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [activeField, setActiveField] = useState<string>("");
   const [loading, setLoading] = useState(false); // Loading state
 
   useEffect(() => {
@@ -123,6 +128,26 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
       });
     }
   }, [interviewData]);
+
+  // Fetch suggestions from backend
+  const fetchSuggestions = async (query: string) => {
+    if (!query) {
+      setUserSuggestions([]);
+      return;
+    }
+  
+    setLoadingSuggestions(true);
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/users/search/?q=${query}`
+      );
+      setUserSuggestions(response.data.users || []); // Use correct response key
+    } catch (error) {
+      console.error("Error fetching user suggestions:", error);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -402,8 +427,43 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               label="Interviewers"
               name="interviewers"
               value={formData.interviewers}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                handleInputChange(e);
+                const lastInput = inputValue.split(",").pop()?.trim();
+                if (lastInput) fetchSuggestions(lastInput);
+              }}
+              onFocus={() => {
+                setActiveField("interviewers");
+                const lastInput = formData.interviewers.split(",").pop()?.trim();
+                if (lastInput) fetchSuggestions(lastInput);
+              }}
+              onBlur={() => {
+                setTimeout(() => setActiveField(""), 200);
+              }}
+              placeholder="Type and press ',' to add multiple interviewers"
             />
+            {activeField === "interviewers" && userSuggestions.length > 0 && (
+              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {userSuggestions.map((suggestion) => (
+                  <Chip
+                    key={suggestion.id}
+                    label={`${suggestion.first_name} ${suggestion.last_name}`}
+                    size="small"
+                    onClick={() => {
+                      const currentValues = formData.interviewers.split(",").map((val) => val.trim());
+                      currentValues.pop();
+                      const newValue = `${suggestion.first_name} ${suggestion.last_name}`;
+                      setFormData({
+                        ...formData,
+                        interviewers: [...currentValues, newValue].join(", "),
+                      });
+                    }}
+                    sx={{ cursor: "pointer" }}
+                  />
+                ))}
+              </Box>
+            )}
           </Grid>
 
           <Grid item xs={12}>
@@ -412,9 +472,37 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               label="Interviewee"
               name="interviewee"
               value={formData.interviewee}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                handleInputChange(e);
+                if (e.target.value.trim()) fetchSuggestions(e.target.value.trim());
+              }}
+              onFocus={(e) => {
+                setActiveField("interviewee");
+                if (formData.interviewee.trim()) fetchSuggestions(formData.interviewee.trim());
+              }}
+              onBlur={() => {
+                setTimeout(() => setActiveField(""), 200);
+              }}
               required
             />
+            {activeField === "interviewee" && userSuggestions.length > 0 && (
+              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {userSuggestions.map((suggestion) => (
+                  <Chip
+                    key={suggestion.id}
+                    label={`${suggestion.first_name} ${suggestion.last_name}`}
+                    size="small"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        interviewee: `${suggestion.first_name} ${suggestion.last_name}`,
+                      })
+                    }
+                    sx={{ cursor: "pointer" }}
+                  />
+                ))}
+              </Box>
+            )}
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -422,9 +510,37 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               label="Role/Title"
               name="role"
               value={formData.role}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                handleInputChange(e);
+                if (e.target.value.trim()) fetchSuggestions(e.target.value.trim());
+              }}
+              onFocus={() => {
+                setActiveField("role");
+                if (formData.role.trim()) fetchSuggestions(formData.role.trim());
+              }}
+              onBlur={() => {
+                setTimeout(() => setActiveField(""), 200);
+              }}
               required
             />
+            {activeField === "role" && userSuggestions.length > 0 && (
+              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {userSuggestions.map((suggestion) => (
+                  <Chip
+                    key={suggestion.id}
+                    label={suggestion.job_title}
+                    size="small"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        role: suggestion.job_title,
+                      })
+                    }
+                    sx={{ cursor: "pointer" }}
+                  />
+                ))}
+              </Box>
+            )}
           </Grid>
           <Grid item xs={12} container spacing={2}>
             <Grid item xs={6}>
@@ -432,10 +548,42 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 fullWidth
                 label="Email"
                 name="email"
-                value={formData.email}
-                onChange={handleInputChange}
+                value={formData.email ?? ""}
+                onChange={(e) => {
+                  handleInputChange(e);
+                  if (e.target.value.trim().length >= 3) {
+                    fetchSuggestions(e.target.value.trim());
+                  }
+                }}
+                onFocus={() => {
+                  setActiveField("email");
+                  if ((formData.email ?? "").trim().length >= 3) {
+                    fetchSuggestions((formData.email ?? "").trim());
+                  }
+                }}
+                onBlur={() => {
+                  setTimeout(() => setActiveField(""), 200);
+                }}
                 required
               />
+              {activeField === "email" && userSuggestions.length > 0 && (
+                <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {userSuggestions.map((suggestion) => (
+                    <Chip
+                      key={suggestion.id}
+                      label={suggestion.email}
+                      size="small"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          email: suggestion.email,
+                        })
+                      }
+                      sx={{ cursor: "pointer" }}
+                    />
+                  ))}
+                </Box>
+              )}
             </Grid>
 
             <Grid item xs={6}>
@@ -443,10 +591,42 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 fullWidth
                 label="Phone Number"
                 name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
+                value={formData.phone ?? ""}
+                onChange={(e) => {
+                  handleInputChange(e);
+                  if (e.target.value.trim().length >= 3) {
+                    fetchSuggestions(e.target.value.trim());
+                  }
+                }}
+                onFocus={() => {
+                  setActiveField("phone");
+                  if ((formData.phone ?? "").trim().length >= 3) {
+                    fetchSuggestions((formData.phone ?? "").trim());
+                  }
+                }}
+                onBlur={() => {
+                  setTimeout(() => setActiveField(""), 200);
+                }}
                 required
               />
+              {activeField === "phone" && userSuggestions.length > 0 && (
+                <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {userSuggestions.map((suggestion) => (
+                    <Chip
+                      key={suggestion.id}
+                      label={suggestion.phone}
+                      size="small"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          phone: suggestion.phone,
+                        })
+                      }
+                      sx={{ cursor: "pointer" }}
+                    />
+                  ))}
+                </Box>
+              )}
             </Grid>
           </Grid>
 
