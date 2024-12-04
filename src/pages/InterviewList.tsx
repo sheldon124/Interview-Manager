@@ -34,6 +34,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import { BACKEND_URL } from "../constants";
+import InterviewModal from "../components/InterviewModal";
 
 type AlignType =
   | "right"
@@ -258,21 +259,6 @@ const InterviewList = () => {
     filterInterviews();
   }, [unassignedFilter, roleFilter, deptFilter, originalInterviews]);
 
-  // useEffect(() => {
-  //   const fetchInterviews = async () => {
-  //     if (!date) return;
-  //     setCalendarFilter("none"); // Disable calendar filter if a specific date is chosen
-
-  //     const formattedDate = date.format("YYYY-MM-DD");
-  //     const interviewsData = await fetchInterviewsByDate(formattedDate);
-
-  //     setInterviews(interviewsData);
-  //     setOriginalInterviews(interviewsData); // Update originalInterviews to reset filters correctly
-  //   };
-
-  //   fetchInterviews();
-  // }, [date]);
-
   useEffect(() => {
     const fetchInterviewsData = async () => {
       if (!date) return;
@@ -415,7 +401,10 @@ const InterviewList = () => {
             data={interviews}
             rowClickHandler={(interviewData) => {
               setCurrentInterview(interviewData);
-              setOpenDetailsModal(true);
+              // console.log(interviewData);
+              setTimeout(() => {
+                setOpenDetailsModal(true);
+              }, 1);
             }}
             onDeleteRow={handleDeleteInterview}
           />
@@ -580,7 +569,7 @@ const InterviewList = () => {
           />
         </Box>
       </Modal>
-      <Modal open={openDetailsModal} disableAutoFocus={true}>
+      <Modal open={false} disableAutoFocus={true}>
         <Box
           sx={{
             position: "absolute",
@@ -748,6 +737,17 @@ const InterviewList = () => {
           )}
         </Box>
       </Modal>
+
+      {currentInterview ? (
+        <InterviewModal
+          open={openDetailsModal}
+          interview={currentInterview}
+          onClose={closeModals}
+          onSave={(updatedInterview: Interview) =>
+            console.log(updatedInterview)
+          }
+        />
+      ) : null}
 
       <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
         <DialogTitle>Are you sure?</DialogTitle>
