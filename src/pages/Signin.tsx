@@ -24,6 +24,7 @@ const Signin = () => {
   };
 
   return (
+    <div className="signin-container">
     <ThemeProvider>
       <div className="flex justify-center items-center h-screen">
   {/* <div className="left-pane bg-blue-700 w-1/3 h-screen" /> */}
@@ -48,7 +49,7 @@ const Signin = () => {
 </div>
     </ThemeProvider>
     
-
+    </div>
   );
 };
 

@@ -17,6 +17,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
 import moment from "moment";
+import ThemeProvider from "../styles/ThemeProvider";
 
 interface Interview {
   id: number | null;
@@ -174,7 +175,8 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
 
   return (
     <Modal open={open} onClose={onClose} disableAutoFocus>
-      <Box
+      <ThemeProvider>
+        <Box
         sx={{
           position: "absolute",
           top: "50%",
@@ -507,6 +509,7 @@ const InterviewModal: React.FC<InterviewModalProps> = ({
           </Button>
         </Box>
       </Box>
+      </ThemeProvider>
     </Modal>
   );
 };
