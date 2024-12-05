@@ -6,7 +6,7 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { Moment } from "moment";
 import { styled } from "@mui/material/styles";
 import { PickersDay, PickersDayProps } from "@mui/x-date-pickers/PickersDay";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import moment from "moment";
 
 interface CalendarProps {
@@ -113,6 +113,10 @@ const customTheme = createTheme({
           "&:hover": {
             backgroundColor: "#222", // Lighter gray for hover effect
           },
+          "&:focus.Mui-selected": {
+            backgroundColor: "#333", // Black background on focus
+            color: "#fff", // Ensure text remains white on focus
+          },
         },
       },
     },
@@ -206,7 +210,10 @@ const CustomPickersDay = styled(PickersDay, {
 );
 
 // Helper function to check if two days are in the same week
-const isInSameWeek = (dayA: Moment, selectedDate: Moment | null | undefined) => {
+const isInSameWeek = (
+  dayA: Moment,
+  selectedDate: Moment | null | undefined
+) => {
   if (!selectedDate) return false;
   return dayA.isSame(selectedDate, "week");
 };
@@ -272,46 +279,55 @@ export default function Calendar({
     <Box sx={{ marginTop: "80px" }}>
       <LocalizationProvider dateAdapter={AdapterMoment}>
         <ThemeProvider theme={customTheme}>
-        <DateCalendar
-          sx={{
-            // border: `1px solid`,
-            width: "330px",
-            backgroundColor: "#000", // Calendar background set to black
-            color: "#fff", // Text color set to white
-            ".MuiPickersMonth-monthButton": {
-      backgroundColor: "#000", // Default background for months
-      color: "#fff", // Default text color
-      "&:hover": {
-        backgroundColor: "#333", // Hover background
-      },
-      "&.Mui-selected": {
-        backgroundColor: "#444", // Selected month background
-        color: "#fff", // Selected month text color
-        fontWeight: "bold",
-        "&:hover": {
-          backgroundColor: "#555", // Slightly lighter when hovered and selected
-        },
-      },
-    },
-          }}
-          value={date}
-          onChange={view === "week" ? handleWeekSelection : handleDateChange}
-          views={view === "month" ? ["year", "month"] : ["day"]}
-          openTo={view === "month" ? "month" : view === "week" ? "day" : "day"}
-          showDaysOutsideCurrentMonth={view !== "day"}
-          slots={{ day: view === "week" ? Day : undefined }}
-          disableHighlightToday={view === "week"}
-          slotProps={{
-            day: (ownerState) => ({
-              selectedDay,
-              hoveredDay,
-              currentWeek: isCurrentWeek(ownerState.day) ?? false,
-              onPointerEnter: () => setHoveredDay(ownerState.day),
-              onPointerLeave: () => setHoveredDay(null),
-            }),
-          }}
-          
-        />
+          <DateCalendar
+            sx={{
+              // border: `1px solid`,
+              width: "330px",
+              backgroundColor: "#000", // Calendar background set to black
+              color: "#fff", // Text color set to white
+              ".MuiPickersMonth-monthButton": {
+                backgroundColor: "#000", // Default background for months
+                color: "#fff", // Default text color
+                "&:hover": {
+                  backgroundColor: "#333", // Hover background
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "#444", // Selected month background
+                  color: "#fff", // Selected month text color
+                  fontWeight: "bold",
+                  // "&:focus.Mui-selected": {
+                  //   backgroundColor: "#333", // Black background on focus
+                  //   color: "#fff", // Ensure text remains white on focus
+                  // },
+                  "&:focus": {
+                    backgroundColor: "#444 !important",
+                    color: "#fff !important",
+                  },
+                  "&:hover": {
+                    backgroundColor: "#555", // Slightly lighter when hovered and selected
+                  },
+                },
+              },
+            }}
+            value={date}
+            onChange={view === "week" ? handleWeekSelection : handleDateChange}
+            views={view === "month" ? ["year", "month"] : ["day"]}
+            openTo={
+              view === "month" ? "month" : view === "week" ? "day" : "day"
+            }
+            showDaysOutsideCurrentMonth={view !== "day"}
+            slots={{ day: view === "week" ? Day : undefined }}
+            disableHighlightToday={view === "week"}
+            slotProps={{
+              day: (ownerState) => ({
+                selectedDay,
+                hoveredDay,
+                currentWeek: isCurrentWeek(ownerState.day) ?? false,
+                onPointerEnter: () => setHoveredDay(ownerState.day),
+                onPointerLeave: () => setHoveredDay(null),
+              }),
+            }}
+          />
         </ThemeProvider>
       </LocalizationProvider>
     </Box>
