@@ -12,6 +12,7 @@ import {
   Alert,
   Backdrop,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -130,7 +131,11 @@ const SigninForm: React.FC = () => {
             </Alert>
           </Snackbar>
           <FormControl>
-            <h1 className="font-bold text-3xl text-center">Sign In</h1>
+            <Typography sx={{
+              fontWeight: 'bold',
+              fontSize: '2rem', // Approx equivalent to text-3xl
+              textAlign: 'center',
+            }}>Sign In</Typography>
             <form
               onSubmit={handleSubmit(onSubmit)}
               className="flex flex-col gap-6 mt-5"
