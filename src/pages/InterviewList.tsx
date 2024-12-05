@@ -37,6 +37,7 @@ import FormControl from "@mui/material/FormControl";
 import { BACKEND_URL } from "../constants";
 import ThemeProvider from "../styles/ThemeProvider";
 import InterviewModal from "../components/InterviewModal";
+import '../App.css';
 
 type AlignType =
   | "right"
@@ -401,7 +402,7 @@ const InterviewList = () => {
   };
 
   return (
-    <>
+    <div className="schedule-container">
     <ThemeProvider>
       <Navbar />
     </ThemeProvider>
@@ -684,7 +685,7 @@ const InterviewList = () => {
       </Snackbar>
       </ThemeProvider>
       
-    </>
+    </div>
   );
 };
 

@@ -161,6 +161,7 @@ function Register() {
   };
 
   return (
+    <div className="signin-container">
     <ThemeProvider>
     <div className="flex items-center justify-center h-screen">
   <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
@@ -360,6 +361,7 @@ function Register() {
   </div>
 </div>
 </ThemeProvider>
+</div>
   );
 }
 
