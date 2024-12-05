@@ -1,6 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 import { Theme } from "@mui/material/styles";
 import "@mui/x-date-pickers/themeAugmentation"; // Import for x-date-pickers theme augmentation
+import "@fontsource/raleway";
 
 const theme: Theme = createTheme({
   palette: {
@@ -20,7 +21,7 @@ const theme: Theme = createTheme({
     },
   },
   typography: {
-    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+    fontFamily: "'Raleway'",
     h1: {
       fontSize: "2rem",
       fontWeight: 700,

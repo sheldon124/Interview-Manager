@@ -10,8 +10,10 @@ import {
   FormControl,
   InputLabel,
   CircularProgress,
+  Chip,
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material/Select";
+import Autocomplete from "@mui/material/Autocomplete";
 import moment from "moment";
 import axios from "axios";
 
@@ -84,6 +86,9 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
     phone: "", // Default value for phone
   });
 
+  const [userSuggestions, setUserSuggestions] = useState<any[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [activeField, setActiveField] = useState<string>("");
   const [loading, setLoading] = useState(false); // Loading state
 
   useEffect(() => {
@@ -123,6 +128,26 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
       });
     }
   }, [interviewData]);
+
+  // Fetch suggestions from backend
+  const fetchSuggestions = async (query: string) => {
+    if (!query) {
+      setUserSuggestions([]);
+      return;
+    }
+  
+    setLoadingSuggestions(true);
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/users/search/?q=${query}`
+      );
+      setUserSuggestions(response.data.users || []); // Use correct response key
+    } catch (error) {
+      console.error("Error fetching user suggestions:", error);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -402,8 +427,43 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               label="Interviewers"
               name="interviewers"
               value={formData.interviewers}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                handleInputChange(e); // Update the input value
+                const lastInput = inputValue.split(",").pop()?.trim(); // Get the last typed name
+                if (lastInput) fetchSuggestions(lastInput); // Fetch suggestions if last input is not empty
+              }}
+              onFocus={() => {
+                setActiveField("interviewers");
+                const lastInput = formData.interviewers.split(",").pop()?.trim();
+                if (lastInput) fetchSuggestions(lastInput);
+              }}
+              onBlur={() => {
+                setTimeout(() => setActiveField(""), 200);
+              }}
+              placeholder="Type and press ',' to add multiple interviewers"
             />
+            {activeField === "interviewers" && userSuggestions.length > 0 && (
+              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {userSuggestions.map((suggestion) => (
+                  <Chip
+                    key={suggestion.id}
+                    label={`${suggestion.first_name} ${suggestion.last_name} (${suggestion.email})`}
+                    size="small"
+                    onClick={() => {
+                      const currentValues = formData.interviewers.split(",").map((val) => val.trim()); // Split by commas
+                      currentValues.pop(); // Remove the last partially typed value
+                      const newValue = `${suggestion.email}`; // Use only the email
+                      setFormData({
+                        ...formData,
+                        interviewers: [...currentValues, newValue].join(", "), // Replace the last input with email
+                      });
+                    }}
+                    sx={{ cursor: "pointer" }}
+                  />
+                ))}
+              </Box>
+            )}
           </Grid>
 
           <Grid item xs={12}>
@@ -414,7 +474,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               value={formData.interviewee}
               onChange={handleInputChange}
               required
-            />
+              />
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -422,9 +482,9 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               label="Role/Title"
               name="role"
               value={formData.role}
-              onChange={handleInputChange}
-              required
-            />
+                onChange={handleInputChange}
+                required
+                />
           </Grid>
           <Grid item xs={12} container spacing={2}>
             <Grid item xs={6}>
@@ -435,7 +495,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-              />
+                />
             </Grid>
 
             <Grid item xs={6}>
@@ -446,7 +506,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 value={formData.phone}
                 onChange={handleInputChange}
                 required
-              />
+                />
             </Grid>
           </Grid>
 

@@ -18,6 +18,7 @@ import {
   Alert,
   Backdrop,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 
 interface FormData {
@@ -161,11 +162,19 @@ function Register() {
   };
 
   return (
+    <div className="signin-container">
     <ThemeProvider>
     <div className="flex items-center justify-center h-screen">
   <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
     <div className="text-center mb-6">
-      <h1 className="text-2xl font-bold">Create Your Account</h1>
+    <Typography
+      sx={{
+        fontSize: '1.5rem', // Approx equivalent to text-2xl
+        fontWeight: 'bold',
+      }}
+    >
+      Create Your Account
+   </Typography>
     </div>
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <Box display="flex" flexDirection="column" gap={2}>
@@ -360,6 +369,7 @@ function Register() {
   </div>
 </div>
 </ThemeProvider>
+</div>
   );
 }
 

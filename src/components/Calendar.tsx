@@ -281,8 +281,7 @@ export default function Calendar({
         <ThemeProvider theme={customTheme}>
           <DateCalendar
             sx={{
-              // border: `1px solid`,
-              width: "330px",
+              width: "300px",
               backgroundColor: "#000", // Calendar background set to black
               color: "#fff", // Text color set to white
               ".MuiPickersMonth-monthButton": {
