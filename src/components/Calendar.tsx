@@ -294,10 +294,6 @@ export default function Calendar({
                   backgroundColor: "#444", // Selected month background
                   color: "#fff", // Selected month text color
                   fontWeight: "bold",
-                  // "&:focus.Mui-selected": {
-                  //   backgroundColor: "#333", // Black background on focus
-                  //   color: "#fff", // Ensure text remains white on focus
-                  // },
                   "&:focus": {
                     backgroundColor: "#444 !important",
                     color: "#fff !important",
