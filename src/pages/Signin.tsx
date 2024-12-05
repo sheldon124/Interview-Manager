@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import SigninForm from "../components/SigninForm";
 import { Snackbar, SnackbarCloseReason, Alert } from "@mui/material";
+import ThemeProvider from "../styles/ThemeProvider";
 
 const Signin = () => {
   const [open, setOpen] = useState(false);
@@ -23,27 +24,31 @@ const Signin = () => {
   };
 
   return (
-    <div className="flex flex-row">
-      <div className="bg-blue-700 w-1/3 h-screen" />
+    <ThemeProvider>
+      <div className="flex justify-center items-center h-screen">
+  {/* <div className="left-pane bg-blue-700 w-1/3 h-screen" /> */}
 
-      <SigninForm />
+  <SigninForm />
 
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <Alert
-          onClose={handleClose}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          Account Created Successfully!
-        </Alert>
-      </Snackbar>
-    </div>
+  <Snackbar
+    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+    open={open}
+    autoHideDuration={6000}
+    onClose={handleClose}
+  >
+    <Alert
+      onClose={handleClose}
+      severity="success"
+      variant="filled"
+      sx={{ width: "100%" }}
+    >
+      Account Created Successfully!
+    </Alert>
+  </Snackbar>
+</div>
+    </ThemeProvider>
+    
+
   );
 };
 

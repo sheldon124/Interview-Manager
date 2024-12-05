@@ -4,6 +4,7 @@ import "./index.css";
 import "./App.css";
 import Signin from "./pages/Signin";
 import ScheduleInterview from "./pages/ScheduleInterview";
+import ThemeProvider from "./styles/ThemeProvider";
 
 import InterviewList from "./pages/InterviewList";
 
@@ -29,9 +30,10 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <div>
-      <RouterProvider router={router} />
+      <div className="signin-container">
+        <RouterProvider router={router} />
     </div>
+    
   );
 }
 

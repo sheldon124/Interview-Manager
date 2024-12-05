@@ -8,8 +8,6 @@ import Button from "@mui/material/Button";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import PersonIcon from "@mui/icons-material/Person";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Navbar: React.FC = () => {
@@ -27,7 +25,6 @@ const Navbar: React.FC = () => {
   };
 
   const handleLogout = () => {
-    // Add your logout logic here (e.g., clearing tokens, redirecting)
     navigate("/signin");
     console.log("Logged out");
     handleMenuClose();
@@ -56,9 +53,9 @@ const Navbar: React.FC = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" sx={{ backgroundColor: "#1976d2" }}>
+      <AppBar position="static">
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
+          <Typography variant="h6" component="div">
             Interview Manager
           </Typography>
           <Box
@@ -73,11 +70,10 @@ const Navbar: React.FC = () => {
               component={Link}
               to="/interview-list"
               color="inherit"
-              // startIcon={<CalendarTodayIcon />}
               sx={{
-                backgroundColor: isActive("/interview-list")
-                  ? "rgba(0,0,0,0.14)"
-                  : "none",
+                ...(isActive("/interview-list") && {
+                  backgroundColor: "rgba(255, 255, 255, 0.2)", // Active button style
+                }),
                 borderRadius: "8px",
               }}
             >
