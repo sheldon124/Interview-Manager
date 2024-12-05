@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { Box, Stack, useTheme } from "@mui/material";
+import { Box } from "@mui/material";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { Moment } from "moment";
 import { styled } from "@mui/material/styles";
 import { PickersDay, PickersDayProps } from "@mui/x-date-pickers/PickersDay";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import moment from "moment";
 
 interface CalendarProps {
   date: Moment | null;
   handleDateChange: (newDate: Moment) => void;
-  view: "month" | "week" | "day"; // New view prop
+  view: "month" | "week" | "day";
 }
 
 interface CustomPickerDayProps extends PickersDayProps<Moment> {
@@ -20,9 +21,156 @@ interface CustomPickerDayProps extends PickersDayProps<Moment> {
   isCurrentWeek: boolean;
 }
 
-const selectedBorderWidth = "1px solid rgba(0, 0, 0, 0.6)";
+const customTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#000000", // Set primary color to black
+    },
+    secondary: {
+      main: "#333333", // Use dark gray for secondary elements
+    },
+    background: {
+      default: "#000000", // Default background black
+      paper: "#121212", // Paper background slightly lighter
+    },
+    text: {
+      primary: "#000000", // Black text for primary content
+      secondary: "#333333", // Dark gray for secondary text
+    },
+  },
+  typography: {
+    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+    h1: {
+      fontSize: "2rem",
+      fontWeight: 700,
+      color: "#000000", // Black headings
+    },
+    body1: {
+      fontSize: "1rem",
+      color: "#000000", // Black text for form and body
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#000", // Black buttons
+          color: "#fff", // White text
+          "&:hover": {
+            backgroundColor: "#333", // Dark gray on hover
+          },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#000", // Black border
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#333", // Dark gray on hover
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#000", // Black border when focused
+          },
+        },
+        input: {
+          color: "#000000", // Black input text
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: "#000000", // Black labels
+          "&.Mui-focused": {
+            color: "#000000",
+          },
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#000", // Black navbar
+          color: "#fff", // White text
+        },
+      },
+    },
+    MuiPickersDay: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#000", // Black background for days
+          color: "#fff", // White text
+          "&.Mui-selected": {
+            backgroundColor: "#333", // Dark gray for selected day
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "#444", // Slightly lighter on hover
+            },
+          },
+          "&:hover": {
+            backgroundColor: "#222", // Lighter gray for hover effect
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#ffffff", // White paper background for form
+          color: "#000000", // Black text for content
+        },
+      },
+    },
+    MuiPickersCalendarHeader: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#000", // Ensure the header background matches
+          color: "#fff", // White text for month and year
+        },
+        switchViewButton: {
+          color: "#fff", // White arrows
+        },
+        labelContainer: {
+          color: "#fff", // White text for month and year
+        },
+      },
+    },
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: {
+          color: "#fff", // Ensure all arrows/icons are white
+        },
+      },
+    },
+    // MuiPickersMonth: {
+    //   styleOverrides: {
+    //     root: {
+    //       backgroundColor: "#000", // Black background for months
+    //       color: "#fff", // White text
+    //       "&:hover": {
+    //         backgroundColor: "#333", // Dark gray background on hover
+    //         cursor: "pointer",
+    //       },
+    //       "MuiPickersMonth-monthButton.Mui-selected": {
+    //         backgroundColor: "#444 !important", // Slightly lighter gray for selected month
+    //         color: "#fff !important",
+    //         fontWeight: "bold",
+    //       },
+    //       "&.Mui-selected:hover": {
+    //         backgroundColor: "#555 !important", // Even lighter on hover when selected
+    //       },
+    //     },
+    //   },
+    // },
+  },
+});
 
-// Custom styling for PickersDay to highlight the week
+const selectedBorderWidth = "1px solid rgba(255, 255, 255, 0.6)"; // White for visibility on black
+
+// Custom styled component for PickersDay
 const CustomPickersDay = styled(PickersDay, {
   shouldForwardProp: (prop) =>
     prop !== "isSelected" && prop !== "isHovered" && prop !== "isCurrentWeek",
@@ -30,17 +178,14 @@ const CustomPickersDay = styled(PickersDay, {
   ({ theme, isSelected, isHovered, day, isCurrentWeek }) => ({
     borderRadius: 0,
     ...(isSelected && {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: "#333",
       color: theme.palette.primary.contrastText,
       "&:hover, &:focus": {
-        backgroundColor: theme.palette.primary.main,
+        backgroundColor: "#333",
       },
     }),
     ...(isHovered && {
-      backgroundColor: theme.palette.primary.light,
-      "&:hover, &:focus": {
-        backgroundColor: theme.palette.primary.light,
-      },
+      backgroundColor: "#333", // Light gray for hover effect
     }),
     ...(day.day() === 0 && {
       borderTopLeftRadius: "50%",
@@ -50,23 +195,20 @@ const CustomPickersDay = styled(PickersDay, {
       borderTopRightRadius: "50%",
       borderBottomRightRadius: "50%",
     }),
-    // Border for the current week
     ...(isCurrentWeek &&
       !isSelected && {
         borderTop: selectedBorderWidth,
         borderBottom: selectedBorderWidth,
-        borderLeft: day.day() === 0 ? selectedBorderWidth : "none", // Apply border only to first and last days of the week
-        borderRight: day.day() === 6 ? selectedBorderWidth : "none", // Apply border only to first and last days of the week
+        borderLeft: day.day() === 0 ? selectedBorderWidth : "none",
+        borderRight: day.day() === 6 ? selectedBorderWidth : "none",
       }),
   })
 );
 
-// Function to check if two days are in the same week
-const isInSameWeek = (dayA: Moment, dayB: Moment | null | undefined) => {
-  if (dayB == null) {
-    return false;
-  }
-  return dayA.isSame(dayB, "week");
+// Helper function to check if two days are in the same week
+const isInSameWeek = (dayA: Moment, selectedDate: Moment | null | undefined) => {
+  if (!selectedDate) return false;
+  return dayA.isSame(selectedDate, "week");
 };
 
 function Day(
@@ -82,12 +224,10 @@ function Day(
     <CustomPickersDay
       {...other}
       day={day}
-      sx={{ px: 2.5 }}
       disableMargin
-      selected={false}
       isSelected={isInSameWeek(day, selectedDay)}
       isHovered={isInSameWeek(day, hoveredDay)}
-      isCurrentWeek={currentWeek ?? false} // Ensure boolean value
+      isCurrentWeek={currentWeek ?? false}
     />
   );
 }
@@ -102,9 +242,9 @@ export default function Calendar({
 
   useEffect(() => {
     if (date) {
-      const currentDate = moment(); // If date prop is not passed, use current date
+      const currentDate = moment();
       if (
-        view == "week" &&
+        view === "week" &&
         date.format("YYYY-MM-DD") !== date.startOf("week").format("YYYY-MM-DD")
       ) {
         handleWeekSelection(currentDate);
@@ -121,10 +261,9 @@ export default function Calendar({
   const handleWeekSelection = (day: Moment) => {
     const startOfWeek = day.startOf("week");
     setSelectedDay(startOfWeek);
-    handleDateChange(startOfWeek); // Update parent component with selected week's start
+    handleDateChange(startOfWeek);
   };
 
-  // Check if the day is within the current week
   const isCurrentWeek = (day: Moment) => {
     return day.isSame(new Date(), "week");
   };
@@ -132,18 +271,36 @@ export default function Calendar({
   return (
     <Box sx={{ marginTop: "80px" }}>
       <LocalizationProvider dateAdapter={AdapterMoment}>
+        <ThemeProvider theme={customTheme}>
         <DateCalendar
           sx={{
-            border: `1px solid`,
-            width: "300px",
+            // border: `1px solid`,
+            width: "330px",
+            backgroundColor: "#000", // Calendar background set to black
+            color: "#fff", // Text color set to white
+            ".MuiPickersMonth-monthButton": {
+      backgroundColor: "#000", // Default background for months
+      color: "#fff", // Default text color
+      "&:hover": {
+        backgroundColor: "#333", // Hover background
+      },
+      "&.Mui-selected": {
+        backgroundColor: "#444", // Selected month background
+        color: "#fff", // Selected month text color
+        fontWeight: "bold",
+        "&:hover": {
+          backgroundColor: "#555", // Slightly lighter when hovered and selected
+        },
+      },
+    },
           }}
           value={date}
-          onChange={view == "week" ? handleWeekSelection : handleDateChange}
-          views={view === "month" ? ["year", "month"] : ["day"]} // Dynamically set views
-          openTo={view === "month" ? "month" : view === "week" ? "day" : "day"} // Open the calendar to the correct view
-          showDaysOutsideCurrentMonth={view !== "day"} // Only show days outside current month in month/week view
-          slots={{ day: view === "week" ? Day : undefined }} // Use custom day rendering for week view
-          disableHighlightToday={view === "week"} // Disable today highlight in day view
+          onChange={view === "week" ? handleWeekSelection : handleDateChange}
+          views={view === "month" ? ["year", "month"] : ["day"]}
+          openTo={view === "month" ? "month" : view === "week" ? "day" : "day"}
+          showDaysOutsideCurrentMonth={view !== "day"}
+          slots={{ day: view === "week" ? Day : undefined }}
+          disableHighlightToday={view === "week"}
           slotProps={{
             day: (ownerState) => ({
               selectedDay,
@@ -153,7 +310,9 @@ export default function Calendar({
               onPointerLeave: () => setHoveredDay(null),
             }),
           }}
+          
         />
+        </ThemeProvider>
       </LocalizationProvider>
     </Box>
   );

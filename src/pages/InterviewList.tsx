@@ -1,6 +1,7 @@
 import Calendar from "../components/Calendar";
 import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   Container,
   Button,
@@ -34,6 +35,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import { BACKEND_URL } from "../constants";
+import ThemeProvider from "../styles/ThemeProvider";
 import InterviewModal from "../components/InterviewModal";
 
 type AlignType =
@@ -400,9 +402,14 @@ const InterviewList = () => {
 
   return (
     <>
+    <ThemeProvider>
       <Navbar />
-      <Container sx={{ display: "flex", marginLeft: "0px", padding: "0px" }}>
-        <Box>
+    </ThemeProvider>
+      
+
+        <Container sx={{ display: "flex", marginLeft: "0px", padding: "0px" }}>
+          <ThemeProvider>
+            <Box>
           <CustomTable
             title="Scheduled Interviews"
             primaryButton={
@@ -449,6 +456,8 @@ const InterviewList = () => {
           orientation="vertical"
           flexItem
         />
+          </ThemeProvider>
+        
         <Stack
           sx={{
             display: "flex",
@@ -459,6 +468,7 @@ const InterviewList = () => {
             gap: 1, // Add spacing between the calendar, radio buttons, and filters
           }}
         >
+          
           {/* Calendar */}
           <Box
             sx={{
@@ -475,9 +485,8 @@ const InterviewList = () => {
               view={view}
             />
           </Box>
-
-          {/* Radio Buttons */}
-          <Box
+          <ThemeProvider>
+            <Box
             sx={{
               width: "100%",
               display: "flex",
@@ -563,8 +572,13 @@ const InterviewList = () => {
               </Select>
             </FormControl>
           </Box>
+            </ThemeProvider>
+          {/* Radio Buttons */}
+          
         </Stack>
       </Container>
+
+      
       <Modal
         open={openModal}
         disableAutoFocus={true}
@@ -588,7 +602,8 @@ const InterviewList = () => {
             onClick={handleCloseModal}
             sx={{ position: "absolute" }}
           />
-          <InterviewForm
+          <ThemeProvider>
+            <InterviewForm
             register={newInterview}
             postApiCallback={(message: string, newInterviewObj: Interview) => {
               // postApiCallback={(message: string) => {
@@ -624,6 +639,8 @@ const InterviewList = () => {
             }
             interviewData={currentInterview}
           />
+          </ThemeProvider>
+          
         </Box>
       </Modal>
 
@@ -635,7 +652,7 @@ const InterviewList = () => {
           onSave={handleSaveInterview}
         />
       ) : null}
-
+      <ThemeProvider>
       <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
         <DialogTitle>Are you sure?</DialogTitle>
         <DialogContent>
@@ -665,6 +682,8 @@ const InterviewList = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      </ThemeProvider>
+      
     </>
   );
 };

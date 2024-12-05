@@ -122,7 +122,10 @@ export default function CustomTable({
                     </TableCell>
                   ) : (
                     <TableCell align={align} key={i} sx={{ px: 1 }}>
-                      <Typography>{id}</Typography>
+                      <Typography sx={{
+    backgroundColor: "black",
+    color: "white", // Set text color to white
+  }}>{id}</Typography>
                     </TableCell>
                   )
                 )}

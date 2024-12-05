@@ -36,3 +36,35 @@
     transform: rotate(360deg);
   }
 }
+
+/* Add a background image to the signin-container */
+.signin-container {
+  background-image: url("../public/B_Image.png");
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+}
+
+Add specific styles for left-pane */
+ .left-pane {
+  background-color: rgba(0, 0, 255, 0.7); 
+ }
+
+/* For full-screen centering */
+.signin-form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh; /* Full screen height */
+
+}
+
+/* Style for the form box */
+.form-box {
+  background-color: white;
+  box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.1), 0px 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 400px; /* Adjust width as needed */
+}
+
