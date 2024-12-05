@@ -113,6 +113,10 @@ const customTheme = createTheme({
           "&:hover": {
             backgroundColor: "#222", // Lighter gray for hover effect
           },
+          "&:focus.Mui-selected": {
+            backgroundColor: "#333", // Black background on focus
+            color: "#fff", // Ensure text remains white on focus
+          },
         },
       },
     },
@@ -290,6 +294,10 @@ export default function Calendar({
                   backgroundColor: "#444", // Selected month background
                   color: "#fff", // Selected month text color
                   fontWeight: "bold",
+                  "&:focus": {
+                    backgroundColor: "#444 !important",
+                    color: "#fff !important",
+                  },
                   "&:hover": {
                     backgroundColor: "#555", // Slightly lighter when hovered and selected
                   },
