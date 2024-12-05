@@ -135,6 +135,7 @@ export default function Calendar({
         <DateCalendar
           sx={{
             border: `1px solid`,
+            width: "300px",
           }}
           value={date}
           onChange={view == "week" ? handleWeekSelection : handleDateChange}

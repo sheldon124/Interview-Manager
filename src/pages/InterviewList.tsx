@@ -401,7 +401,7 @@ const InterviewList = () => {
   return (
     <>
       <Navbar />
-      <Container sx={{ display: "flex", marginLeft: "40px" }}>
+      <Container sx={{ display: "flex", marginLeft: "0px", padding: "0px" }}>
         <Box>
           <CustomTable
             title="Scheduled Interviews"
@@ -442,7 +442,84 @@ const InterviewList = () => {
             }}
             onDeleteRow={handleDeleteInterview}
           />
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        </Box>
+        <Divider
+          variant="middle"
+          sx={{ marginTop: "25px" }}
+          orientation="vertical"
+          flexItem
+        />
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: "column", // Align items vertically
+            alignItems: "flex-start", // Align everything to the top
+            marginTop: "0px",
+            marginLeft: "10px",
+            gap: 1, // Add spacing between the calendar, radio buttons, and filters
+          }}
+        >
+          {/* Calendar */}
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Calendar
+              date={date}
+              handleDateChange={(newValue) => {
+                setDate(newValue);
+              }}
+              view={view}
+            />
+          </Box>
+
+          {/* Radio Buttons */}
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center", // Center the radio buttons
+            }}
+          >
+            <FormControl>
+              <RadioGroup
+                row
+                aria-labelledby="view-radio-buttons"
+                name="view-options"
+                value={view}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setView(event.target.value as "day" | "week" | "month")
+                }
+              >
+                <FormControlLabel value="day" control={<Radio />} label="Day" />
+                <FormControlLabel
+                  value="week"
+                  control={<Radio />}
+                  label="Week"
+                />
+                <FormControlLabel
+                  value="month"
+                  control={<Radio />}
+                  label="Month"
+                />
+              </RadioGroup>
+            </FormControl>
+          </Box>
+
+          {/* Filters */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column", // Stack filters vertically
+              justifyContent: "flex-start", // Align filters to the top
+              alignItems: "center", // Center filters horizontally
+              gap: 2, // Add spacing between filter elements
+              width: "100%",
+            }}
+          >
             <FormControlLabel
               control={
                 <Switch
@@ -450,9 +527,10 @@ const InterviewList = () => {
                   onChange={handleToggleUnassigned}
                 />
               }
+              sx={{ paddingLeft: "8px" }}
               label="Unassigned"
             />
-            <FormControl variant="outlined" size="small" sx={{ ml: 2 }}>
+            <FormControl variant="outlined" size="small">
               <InputLabel>Role</InputLabel>
               <Select
                 value={roleFilter}
@@ -469,7 +547,7 @@ const InterviewList = () => {
               </Select>
             </FormControl>
 
-            <FormControl variant="outlined" size="small" sx={{ ml: 2 }}>
+            <FormControl variant="outlined" size="small">
               <InputLabel>Dept</InputLabel>
               <Select
                 value={deptFilter}
@@ -483,61 +561,6 @@ const InterviewList = () => {
                 <MenuItem value="Cyber-Security">Cyber-Security</MenuItem>
                 <MenuItem value="Finance">Finance</MenuItem>
               </Select>
-            </FormControl>
-          </Box>
-        </Box>
-        <Divider sx={{ marginTop: "60px" }} orientation="vertical" flexItem />
-        <Stack>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "80px",
-              marginLeft: "50px",
-            }}
-          >
-            <Calendar
-              date={date}
-              handleDateChange={(newValue) => {
-                setDate(newValue);
-              }}
-              view={view}
-            />
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              // justifyContent: "center",
-              marginTop: "40px",
-              marginLeft: "50px",
-            }}
-          >
-            <FormControl>
-              <RadioGroup
-                row
-                aria-labelledby="demo-controlled-radio-buttons-group"
-                name="controlled-radio-buttons-group"
-                value={view}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setView(event.target.value as "day" | "week" | "month")
-                }
-                // row
-              >
-                <FormControlLabel value="day" control={<Radio />} label="Day" />
-
-                <FormControlLabel
-                  value="week"
-                  control={<Radio />}
-                  label="Week"
-                />
-
-                <FormControlLabel
-                  value="month"
-                  control={<Radio />}
-                  label="Month"
-                />
-              </RadioGroup>
             </FormControl>
           </Box>
         </Stack>
