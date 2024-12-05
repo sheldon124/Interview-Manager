@@ -18,6 +18,8 @@ import {
   Grid,
   Card,
   CardContent,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import moment, { Moment } from "moment";
@@ -114,38 +116,6 @@ interface Interview {
   email: string;
   phone: string;
 }
-
-const scheduleInOutlookWeb = (interview: Interview) => {
-  const subject = `Interview with ${interview.interviewee}`;
-  const startDateTime = new Date(
-    `${interview.date}T${interview.time}`
-  ).toISOString(); // Start time in ISO format
-
-  // Parse duration from hh:mm:ss format
-  const [hours, minutes, seconds] = interview.duration.split(":").map(Number);
-  const durationInMilliseconds = (hours * 3600 + minutes * 60 + seconds) * 1000;
-
-  // Calculate end time
-  const endDateTime = new Date(
-    new Date(`${interview.date}T${interview.time}`).getTime() +
-      durationInMilliseconds
-  ).toISOString();
-
-  const location = "Online";
-  const body = `Interview Details:\n\nRole: ${interview.role}\nDepartment: ${interview.department}\nAdditional Notes: ${interview.additional_notes}`;
-
-  // URL for creating a new calendar event on Outlook Web
-  const outlookUrl = `https://outlook.office.com/calendar/deeplink/compose?subject=${encodeURIComponent(
-    subject
-  )}&startdt=${encodeURIComponent(startDateTime)}&enddt=${encodeURIComponent(
-    endDateTime
-  )}&location=${encodeURIComponent(location)}&body=${encodeURIComponent(
-    body
-  )}&to=${encodeURIComponent(interview.email)}`;
-
-  // Open the URL in a new tab
-  window.open(outlookUrl, "_blank");
-};
 
 const InterviewList = () => {
   const navigate = useNavigate();
@@ -408,57 +378,57 @@ const InterviewList = () => {
     </ThemeProvider>
       
 
-        <Container sx={{ display: "flex", marginLeft: "0px", padding: "0px" }}>
-          <ThemeProvider>
-            <Box>
-          <CustomTable
-            title="Scheduled Interviews"
-            primaryButton={
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ gap: "4px", padding: "8px 24px 8px 20px" }}
-                onClick={() => {
-                  setNewInterview(true);
-                  setOpenModal(true);
-                  setCurrentInterview(null);
-                }}
-              >
-                <AddIcon sx={{ fontSize: "1.25rem" }} />
-                Schedule
-              </Button>
-            }
-            TABLE_HEAD={TABLE_HEAD_IL}
-            columnOrder={[
-              "id",
-              "interviewee",
-              "date",
-              "time",
-              "duration",
-              "role",
-              "department",
-              "interviewer",
-              "additional_notes",
-            ]}
-            data={interviews}
-            rowClickHandler={(interviewData) => {
-              setCurrentInterview(interviewData);
-              // console.log(interviewData);
-              setTimeout(() => {
-                setOpenDetailsModal(true);
-              }, 1);
-            }}
-            onDeleteRow={handleDeleteInterview}
+      <Container sx={{ display: "flex", marginLeft: "0px", padding: "0px" }}>
+        <ThemeProvider>
+          <Box>
+            <CustomTable
+              title="Scheduled Interviews"
+              primaryButton={
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ gap: "4px", padding: "8px 24px 8px 20px" }}
+                  onClick={() => {
+                    setNewInterview(true);
+                    setOpenModal(true);
+                    setCurrentInterview(null);
+                  }}
+                >
+                  <AddIcon sx={{ fontSize: "1.25rem" }} />
+                  Schedule
+                </Button>
+              }
+              TABLE_HEAD={TABLE_HEAD_IL}
+              columnOrder={[
+                "id",
+                "interviewee",
+                "date",
+                "time",
+                "duration",
+                "role",
+                "department",
+                "interviewer",
+                "additional_notes",
+              ]}
+              data={interviews}
+              rowClickHandler={(interviewData) => {
+                setCurrentInterview(interviewData);
+                // console.log(interviewData);
+                setTimeout(() => {
+                  setOpenDetailsModal(true);
+                }, 1);
+              }}
+              onDeleteRow={handleDeleteInterview}
+            />
+          </Box>
+          <Divider
+            variant="middle"
+            sx={{ marginTop: "25px" }}
+            orientation="vertical"
+            flexItem
           />
-        </Box>
-        <Divider
-          variant="middle"
-          sx={{ marginTop: "25px" }}
-          orientation="vertical"
-          flexItem
-        />
-          </ThemeProvider>
-        
+        </ThemeProvider>
+
         <Stack
           sx={{
             display: "flex",
@@ -469,7 +439,6 @@ const InterviewList = () => {
             gap: 1, // Add spacing between the calendar, radio buttons, and filters
           }}
         >
-          
           {/* Calendar */}
           <Box
             sx={{
@@ -488,98 +457,99 @@ const InterviewList = () => {
           </Box>
           <ThemeProvider>
             <Box
-            sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center", // Center the radio buttons
-            }}
-          >
-            <FormControl>
-              <RadioGroup
-                row
-                aria-labelledby="view-radio-buttons"
-                name="view-options"
-                value={view}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setView(event.target.value as "day" | "week" | "month")
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center", // Center the radio buttons
+              }}
+            >
+              <FormControl>
+                <ToggleButtonGroup
+                  value={view}
+                  exclusive
+                  onChange={(event, newView) => {
+                    if (newView !== null) {
+                      setView(newView);
+                    }
+                  }}
+                  aria-label="view options"
+                  sx={{
+                    borderRadius: "8px",
+                    border: "1px solid #ccc", // Optional: Add a border around the group
+                  }}
+                >
+                  <ToggleButton value="day" aria-label="Day view">
+                    Day
+                  </ToggleButton>
+                  <ToggleButton value="week" aria-label="Week view">
+                    Week
+                  </ToggleButton>
+                  <ToggleButton value="month" aria-label="Month view">
+                    Month
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </FormControl>
+            </Box>
+
+            {/* Filters */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column", // Stack filters vertically
+                justifyContent: "flex-start", // Align filters to the top
+                alignItems: "center", // Center filters horizontally
+                gap: 2, // Add spacing between filter elements
+                width: "100%",
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={unassignedFilter}
+                    onChange={handleToggleUnassigned}
+                  />
                 }
-              >
-                <FormControlLabel value="day" control={<Radio />} label="Day" />
-                <FormControlLabel
-                  value="week"
-                  control={<Radio />}
-                  label="Week"
-                />
-                <FormControlLabel
-                  value="month"
-                  control={<Radio />}
-                  label="Month"
-                />
-              </RadioGroup>
-            </FormControl>
-          </Box>
+                sx={{ paddingLeft: "8px" }}
+                label="Unassigned"
+              />
+              <FormControl variant="outlined" size="small">
+                <InputLabel>Role</InputLabel>
+                <Select
+                  value={roleFilter}
+                  onChange={handleRoleChange}
+                  label="Role"
+                  sx={{ minWidth: 150 }}
+                >
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="Manager">Manager</MenuItem>
+                  <MenuItem value="Senior">Senior</MenuItem>
+                  <MenuItem value="Junior">Junior</MenuItem>
+                  <MenuItem value="Team Lead">Team Lead</MenuItem>
+                  <MenuItem value="Intern">Intern</MenuItem>
+                </Select>
+              </FormControl>
 
-          {/* Filters */}
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column", // Stack filters vertically
-              justifyContent: "flex-start", // Align filters to the top
-              alignItems: "center", // Center filters horizontally
-              gap: 2, // Add spacing between filter elements
-              width: "100%",
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={unassignedFilter}
-                  onChange={handleToggleUnassigned}
-                />
-              }
-              sx={{ paddingLeft: "8px" }}
-              label="Unassigned"
-            />
-            <FormControl variant="outlined" size="small">
-              <InputLabel>Role</InputLabel>
-              <Select
-                value={roleFilter}
-                onChange={handleRoleChange}
-                label="Role"
-                sx={{ minWidth: 150 }}
-              >
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="Manager">Manager</MenuItem>
-                <MenuItem value="Senior">Senior</MenuItem>
-                <MenuItem value="Junior">Junior</MenuItem>
-                <MenuItem value="Team Lead">Team Lead</MenuItem>
-                <MenuItem value="Intern">Intern</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl variant="outlined" size="small">
-              <InputLabel>Dept</InputLabel>
-              <Select
-                value={deptFilter}
-                onChange={handleDeptChange}
-                label="Dept"
-                sx={{ minWidth: 150 }}
-              >
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="Software">Software</MenuItem>
-                <MenuItem value="Testing">Testing</MenuItem>
-                <MenuItem value="Cyber-Security">Cyber-Security</MenuItem>
-                <MenuItem value="Finance">Finance</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-            </ThemeProvider>
+              <FormControl variant="outlined" size="small">
+                <InputLabel>Dept</InputLabel>
+                <Select
+                  value={deptFilter}
+                  onChange={handleDeptChange}
+                  label="Dept"
+                  sx={{ minWidth: 150 }}
+                >
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="Software">Software</MenuItem>
+                  <MenuItem value="Testing">Testing</MenuItem>
+                  <MenuItem value="Cyber-Security">Cyber-Security</MenuItem>
+                  <MenuItem value="Finance">Finance</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </ThemeProvider>
           {/* Radio Buttons */}
-          
         </Stack>
       </Container>
 
-      
       <Modal
         open={openModal}
         disableAutoFocus={true}
@@ -605,43 +575,45 @@ const InterviewList = () => {
           />
           <ThemeProvider>
             <InterviewForm
-            register={newInterview}
-            postApiCallback={(message: string, newInterviewObj: Interview) => {
-              // postApiCallback={(message: string) => {
-              setOpenModal(false);
-              if (message === "success") {
-                setSnackbarMessage("Interview scheduled successfully.");
-                setSnackbarSeverity("success");
-                setInterviews((old) => [...old, newInterviewObj]);
-                const fetchInterviews = async () => {
-                  if (!date) return;
-                  setCalendarFilter("none"); // Disable calendar filter if a specific date is chosen
+              register={newInterview}
+              postApiCallback={(
+                message: string,
+                newInterviewObj: Interview
+              ) => {
+                // postApiCallback={(message: string) => {
+                setOpenModal(false);
+                if (message === "success") {
+                  setSnackbarMessage("Interview scheduled successfully.");
+                  setSnackbarSeverity("success");
+                  setInterviews((old) => [...old, newInterviewObj]);
+                  const fetchInterviews = async () => {
+                    if (!date) return;
+                    setCalendarFilter("none"); // Disable calendar filter if a specific date is chosen
 
-                  const formattedDate = date.format("YYYY-MM-DD");
-                  const interviewsData = await fetchInterviewsByDate(
-                    formattedDate
-                  );
+                    const formattedDate = date.format("YYYY-MM-DD");
+                    const interviewsData = await fetchInterviewsByDate(
+                      formattedDate
+                    );
 
-                  setInterviews(interviewsData);
-                  setOriginalInterviews(interviewsData); // Update originalInterviews to reset filters correctly
-                };
+                    setInterviews(interviewsData);
+                    setOriginalInterviews(interviewsData); // Update originalInterviews to reset filters correctly
+                  };
 
-                fetchInterviews();
-              } else {
-                setSnackbarMessage(message);
-                setSnackbarSeverity("error");
+                  fetchInterviews();
+                } else {
+                  setSnackbarMessage(message);
+                  setSnackbarSeverity("error");
+                }
+                setSnackbarOpen(true);
+              }}
+              currId={
+                interviews.length > 0
+                  ? interviews[interviews.length - 1].id
+                  : null
               }
-              setSnackbarOpen(true);
-            }}
-            currId={
-              interviews.length > 0
-                ? interviews[interviews.length - 1].id
-                : null
-            }
-            interviewData={currentInterview}
-          />
+              interviewData={currentInterview}
+            />
           </ThemeProvider>
-          
         </Box>
       </Modal>
 
@@ -654,35 +626,35 @@ const InterviewList = () => {
         />
       ) : null}
       <ThemeProvider>
-      <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
-        <DialogTitle>Are you sure?</DialogTitle>
-        <DialogContent>
-          <p>Are you sure you want to delete this interview?</p>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelDelete} color="primary">
-            No
-          </Button>
-          <Button onClick={confirmDelete} color="secondary">
-            Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
+          <DialogTitle>Are you sure?</DialogTitle>
+          <DialogContent>
+            <p>Are you sure you want to delete this interview?</p>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancelDelete} color="primary">
+              No
+            </Button>
+            <Button onClick={confirmDelete} color="secondary">
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-      >
-        <Alert
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
           onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          variant="filled"
-          sx={{ width: "100%" }}
         >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbarSeverity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </ThemeProvider>
       
     </div>
