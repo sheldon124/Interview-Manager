@@ -39,7 +39,7 @@ import FormControl from "@mui/material/FormControl";
 import { BACKEND_URL } from "../constants";
 import ThemeProvider from "../styles/ThemeProvider";
 import InterviewModal from "../components/InterviewModal";
-import '../App.css';
+import "../App.css";
 
 type AlignType =
   | "right"
@@ -373,10 +373,9 @@ const InterviewList = () => {
 
   return (
     <div className="schedule-container">
-    <ThemeProvider>
-      <Navbar />
-    </ThemeProvider>
-      
+      <ThemeProvider>
+        <Navbar />
+      </ThemeProvider>
 
       <Container sx={{ display: "flex", marginLeft: "0px", padding: "0px" }}>
         <ThemeProvider>
@@ -585,7 +584,6 @@ const InterviewList = () => {
                 if (message === "success") {
                   setSnackbarMessage("Interview scheduled successfully.");
                   setSnackbarSeverity("success");
-                  setInterviews((old) => [...old, newInterviewObj]);
                   const fetchInterviews = async () => {
                     if (!date) return;
                     setCalendarFilter("none"); // Disable calendar filter if a specific date is chosen
@@ -600,11 +598,12 @@ const InterviewList = () => {
                   };
 
                   fetchInterviews();
-                } else {
-                  setSnackbarMessage(message);
-                  setSnackbarSeverity("error");
+                  setSnackbarOpen(true);
                 }
-                setSnackbarOpen(true);
+                // else {
+                //   setSnackbarMessage(message);
+                //   setSnackbarSeverity("error");
+                // }
               }}
               currId={
                 interviews.length > 0
@@ -656,7 +655,6 @@ const InterviewList = () => {
           </Alert>
         </Snackbar>
       </ThemeProvider>
-      
     </div>
   );
 };
