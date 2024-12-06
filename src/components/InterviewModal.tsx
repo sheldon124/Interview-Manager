@@ -52,7 +52,11 @@ function convertDuration(duration: string): [string, "hours" | "minutes"] {
 }
 
 const scheduleInOutlookWeb = (interview: Interview) => {
-  const subject = `Interview with ${interview.interviewee}`;
+  const subject = `Interview for ${
+    interview.role
+  } Role at Rocket Innovations – ${moment(interview.date).format(
+    "MMMM Do, YYYY"
+  )} at ${interview.time}`;
   const startDateTime = new Date(
     `${interview.date}T${interview.time}`
   ).toISOString(); // Start time in ISO format
@@ -67,10 +71,56 @@ const scheduleInOutlookWeb = (interview: Interview) => {
       durationInMilliseconds
   ).toISOString();
 
-  const location = "Online";
-  const body = `Interview Details:\n\nRole: ${interview.role}\nDepartment: ${interview.department}\nAdditional Notes: ${interview.additional_notes}`;
+  const location = "Online"; // Placeholder for location
+  const timeZone = "EST";
 
-  // URL for creating a new calendar event on Outlook Web
+  // List of interviewers - adjust as needed
+  const interviewers = interview.interviewer.length? interview.interviewer
+    .split(",")
+    .map((name) => `<li>${name}</li>`)
+    .join(""): '';
+  // Construct the body of the email in the desired format
+  let body = `
+    <p>Dear ${interview.interviewee},</p>
+    <br>
+
+    <p>Thank you for your interest in the ${
+      interview.role
+    } position at Rocket Innovations. We are excited to move forward with your application and would like to invite you to interview for the role of ${
+    interview.role
+  }. Below are the details of your upcoming interview:</p>
+  <br>
+
+    <p><strong>Date & Time:</strong><br>
+    ${moment(interview.date).format("MMMM Do, YYYY")} at ${
+    interview.time
+  } (Time Zone: ${timeZone})</p>
+  <br>`;
+
+  // Include interviewers section only if interviewers are provided
+  if (interviewers) {
+    body += `
+    <p><strong>Interviewers:</strong></p>
+    <ul style="list-style-type: disc; margin: 0; padding-left: 20px; text-align: left;">
+      ${interviewers}
+    </ul>
+    <br>`;
+  }
+
+  body += `
+    <p>If you have any questions before the interview or need to reschedule, please don’t hesitate to reach out.</p>
+
+    <p>Looking forward to speaking with you!</p>
+    <br>
+    <br>
+
+    <p>Best regards,<br>
+    
+    <br>
+    The Rocket Innovations Team<br>
+  `;
+
+  // URL for creating a new calendar event on Outlook Web with the custom body
   const outlookUrl = `https://outlook.office.com/calendar/deeplink/compose?subject=${encodeURIComponent(
     subject
   )}&startdt=${encodeURIComponent(startDateTime)}&enddt=${encodeURIComponent(
