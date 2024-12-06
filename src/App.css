@@ -52,7 +52,7 @@
   min-height: 100vh;
 }
 
-Add specific styles for left-pane */
+/* Add specific styles for left-pane */
  .left-pane {
   background-color: rgba(0, 0, 255, 0.7); 
  }
