@@ -10,8 +10,12 @@ import {
   FormControl,
   InputLabel,
   CircularProgress,
+  Snackbar,
+  Alert,
+  SnackbarCloseReason,
   Chip,
 } from "@mui/material";
+import { AxiosError } from "axios";
 import { SelectChangeEvent } from "@mui/material/Select";
 import Autocomplete from "@mui/material/Autocomplete";
 import moment from "moment";
@@ -52,6 +56,10 @@ interface InterviewFormProps {
   interviewData: Interview | null;
 }
 
+interface ErrorResponse {
+  [key: string]: string[];
+}
+
 function convertDuration(duration: string): [string, "hours" | "minutes"] {
   // Split the duration string into hours and minutes
   const [hours, minutes] = duration.split(":").map(Number);
@@ -90,6 +98,9 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [activeField, setActiveField] = useState<string>("");
   const [loading, setLoading] = useState(false); // Loading state
+  const [open, setOpen] = useState(false);
+
+  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     if (interviewData) {
@@ -129,13 +140,26 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
     }
   }, [interviewData]);
 
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setApiError(null);
+
+    setOpen(false);
+  };
+
   // Fetch suggestions from backend
   const fetchSuggestions = async (query: string) => {
     if (!query) {
       setUserSuggestions([]);
       return;
     }
-  
+
     setLoadingSuggestions(true);
     try {
       const response = await axios.get(
@@ -217,6 +241,32 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
     } catch (error) {
       console.error("Error scheduling interview:", error);
 
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<ErrorResponse>;
+        if (axiosError.response && axiosError.response.data) {
+          // Backend validation errors
+          const errorData = axiosError.response.data;
+
+          // Format errors into a readable string
+          const formattedErrors = Object.keys(errorData)
+            .map((key) => `<strong>${key}</strong>: ${errorData[key][0]}`)
+            .join("<br />");
+
+          setApiError(formattedErrors);
+        } else if (axiosError.request) {
+          // No response received (network error)
+          setApiError("Network error. Please check your internet connection.");
+        } else {
+          // Unknown Axios error
+          setApiError("An unexpected error occurred. Please try again.");
+        }
+      } else {
+        // Handle non-Axios errors
+        setApiError("An unknown error occurred. Please try again.");
+      }
+
+      setOpen(true); // Open the Snackbar
+
       const emptyInterview: Interview = {
         id: null,
         interviewee: "",
@@ -231,10 +281,10 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
         additional_notes: "",
       };
 
-      postApiCallback(
-        "Error scheduling interview. Please try again later.",
-        emptyInterview
-      );
+      // postApiCallback(
+      //   "Error scheduling interview. Please try again later.",
+      //   emptyInterview
+      // );
     } finally {
       setLoading(false); // Set loading to false when the API call is finished
     }
@@ -435,7 +485,10 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               }}
               onFocus={() => {
                 setActiveField("interviewers");
-                const lastInput = formData.interviewers.split(",").pop()?.trim();
+                const lastInput = formData.interviewers
+                  .split(",")
+                  .pop()
+                  ?.trim();
                 if (lastInput) fetchSuggestions(lastInput);
               }}
               onBlur={() => {
@@ -451,7 +504,9 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                     label={`${suggestion.first_name} ${suggestion.last_name} (${suggestion.email})`}
                     size="small"
                     onClick={() => {
-                      const currentValues = formData.interviewers.split(",").map((val) => val.trim()); // Split by commas
+                      const currentValues = formData.interviewers
+                        .split(",")
+                        .map((val) => val.trim()); // Split by commas
                       currentValues.pop(); // Remove the last partially typed value
                       const newValue = `${suggestion.email}`; // Use only the email
                       setFormData({
@@ -474,7 +529,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               value={formData.interviewee}
               onChange={handleInputChange}
               required
-              />
+            />
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -482,9 +537,9 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
               label="Role/Title"
               name="role"
               value={formData.role}
-                onChange={handleInputChange}
-                required
-                />
+              onChange={handleInputChange}
+              required
+            />
           </Grid>
           <Grid item xs={12} container spacing={2}>
             <Grid item xs={6}>
@@ -495,7 +550,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                />
+              />
             </Grid>
 
             <Grid item xs={6}>
@@ -506,7 +561,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
                 value={formData.phone}
                 onChange={handleInputChange}
                 required
-                />
+              />
             </Grid>
           </Grid>
 
@@ -540,6 +595,20 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
           </Grid>
         </Grid>
       </form>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert
+          onClose={handleClose}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          <div
+            dangerouslySetInnerHTML={{
+              __html: apiError || "",
+            }}
+          />
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
